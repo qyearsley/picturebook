@@ -1,0 +1,185 @@
+{
+  "slug": "pip-forgets",
+  "version": "1",
+  "title": {
+    "en": "Pip Forgets",
+    "zh": "小松鼠忘啦"
+  },
+  "author": "By Q Yearsley, AI-assisted",
+  "background": {
+    "synopsis": "Pip the squirrel buries a hundred acorns all autumn and is certain he will remember every one. He finds eleven. The other eighty-nine spend the winter underground, and in spring they come up as oak trees. Pip has no idea he planted them.",
+    "cast": "Pip the squirrel. No humans, no children, nobody who talks.",
+    "setting": "One patch of oak woodland, across all four seasons. The book does not name a place.",
+    "shape": "Repetition through a turning year, with the payoff a year later",
+    "no_lesson": "Pip is not scolded for a bad memory and does not improve. The real fact is that squirrels never dig up many of the nuts they bury, and forgetting is how oak forests spread. The book states the fact and stops.",
+    "meter_en": "Gentle four-beat couplets, soft and slow.",
+    "meter_zh": "5+5 per line, two lines per page."
+  },
+  "cast": [
+    "pip"
+  ],
+  "page": {
+    "art_aspect": "1:1",
+    "art_px": 1024,
+    "width_in": 8.0,
+    "height_in": 10.6667
+  },
+  "layout": {
+    "margin_in": 0.55,
+    "image_height_frac": 0.6,
+    "image_fit": "cover",
+    "text_placement": "overlay",
+    "gutter_in": 0.3,
+    "background": "#fdfcf8",
+    "overlay": {
+      "color": "#fdfcf8",
+      "alpha": 0.92,
+      "padding_in": 0.34,
+      "band_height_frac": 0.3,
+      "position": "bottom"
+    },
+    "en": {
+      "size": 18,
+      "leading": 24,
+      "color": "#20242b",
+      "align": "center"
+    },
+    "zh": {
+      "size": 20,
+      "leading": 32,
+      "color": "#3c4450",
+      "align": "center"
+    },
+    "show_page_numbers": true
+  },
+  "fonts": {
+    "en": [
+      "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "C:/Windows/Fonts/georgia.ttf",
+      "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "Times-Roman"
+    ],
+    "zh": [
+      "/System/Library/Fonts/STHeiti Medium.ttc:1",
+      "/System/Library/Fonts/Supplemental/Songti.ttc:6",
+      "C:/Windows/Fonts/simhei.ttf",
+      "/usr/share/fonts/truetype/arphic/uming.ttc",
+      "STSong-Light"
+    ]
+  },
+  "cover": {
+    "image": "cover.png",
+    "prompt": "A fluffy-tailed gray squirrel with a tiny canvas satchel sitting upright on bare autumn ground, holding one acorn in both paws and looking at it with enormous seriousness, as though committing it to memory. Around him, drawn small and faint like a thought, a hundred faint dotted circles scattered across the woodland floor marking places he will not remember. Low golden autumn light through oak branches. Palette of oak-leaf russet, acorn brown, squirrel gray, gold light. Keep the top of the frame clear for the title.",
+    "notes": "The faint dotted circles are the whole book in one image.",
+    "line_prompt": "A small squirrel with a big fluffy tail and a tiny canvas satchel sits upright on the ground under oak branches, holding one acorn in both paws and staring at it very seriously. Fallen oak leaves around him, and small dotted circles scattered across the ground."
+  },
+  "pinyin_overrides": {
+    "十一颗": "shí yī kē",
+    "错不了": "cuò bu liǎo",
+    "一共": "yí gòng",
+    "一棵": "yì kē",
+    "一颗": "yì kē",
+    "埋得": "mái de",
+    "橡子": "xiàng zǐ"
+  },
+  "pages": [
+    {
+      "n": 1,
+      "image": "page-01.png",
+      "en": "In the fall the great oak in the wood let go,\nand the acorns came down on the ground below.",
+      "zh": "秋天到了呀，橡子落满地。\n一颗又一颗，掉在树林里。",
+      "prompt": "Looking up into the canopy of a big oak in full autumn, sun coming through in shafts, and acorns falling — a dozen of them caught at different heights against the light, some blurred with speed, casting tiny shadows. At the very bottom edge of the frame, a small gray squirrel with a canvas satchel looking up, mouth slightly open. Palette of russet, ochre, oak-leaf green-gold, deep bark brown. Keep the lower third of shadowed ground clean for text.",
+      "notes": "This is a book of seasons. Autumn is russet and gold, winter is blue-gray and white, spring is pale green. Hold those three palettes hard.",
+      "line_prompt": "Looking up into the branches of a big oak tree, with acorns falling through the air. At the bottom of the picture, a small squirrel with a big fluffy tail and a tiny canvas satchel looks up at them with his mouth open."
+    },
+    {
+      "n": 2,
+      "image": "page-02.png",
+      "en": "Pip dug a hole in the dirt by the fern\nand he dropped one in. (He would surely return.)",
+      "zh": "皮普挖个坑，就在蕨草下。\n埋颗小橡子，心想：记住啦。",
+      "prompt": "Close low view at ground level. A fluffy-tailed gray squirrel with a tiny canvas satchel patting soil flat over a small hole with both front paws, beside a single distinctive-looking fern. He is looking back over his shoulder at the fern, memorising it, with a face of absolute confidence. Fallen oak leaves, a scatter of soil. Warm low autumn light from the side. Palette of russet, soil brown, fern green, squirrel gray. Keep the top of the frame as blurred woodland for text.",
+      "notes": "Draw this fern so it looks special. On page 5 the reader must see that it looks exactly like every other fern.",
+      "text_position": "top",
+      "line_prompt": "Close-up at ground level: a small squirrel with a big fluffy tail and a tiny canvas satchel pats soil flat over a small hole with both front paws, next to one large, unusual fern. He looks back over his shoulder at the fern, very confident. Fallen oak leaves around him."
+    },
+    {
+      "n": 3,
+      "image": "page-03.png",
+      "en": "He dug by the log. He dug by the stone.\nHe dug in the open, a spot all alone.",
+      "zh": "木头边一颗，石边埋得好。\n空地埋一颗，他说错不了。",
+      "prompt": "A wide view of the whole woodland floor from a slightly raised angle, showing the same squirrel repeated five times across the frame at different distances, digging in five different spots — beside a fallen log, beside a gray stone, beside a root, beside a stump, and in the open middle of nowhere at all with no landmark whatsoever. The last one is the funniest and should be the most confident. Autumn light, long shadows. Palette of russet leaf litter, log gray-brown, gold light. Keep the sky-lit top strip clean for text.",
+      "notes": "Repeating the same character across one frame to show elapsed time.",
+      "text_position": "top",
+      "line_prompt": "A small squirrel with a big fluffy tail and a tiny canvas satchel crouches beside a fallen log, digging a hole in the soil with both front paws, bits of dirt flying.",
+      "paint_prompt": "One squirrel only. Autumn woodland floor of russet leaf litter, a gray-brown log, low gold light. Pip's fur is light gray and his satchel is tan."
+    },
+    {
+      "n": 4,
+      "image": "page-04.png",
+      "en": "By dark he had buried a hundred or more.\nPip was extremely pleased with his store.",
+      "zh": "天黑的时候，埋了一百个。\n皮普真得意，一个不会错。",
+      "prompt": "Dusk. A fluffy-tailed gray squirrel sitting up tall on a stump in the last orange light, front paws on his chest, chin up, tail curled behind him in a magnificent question mark — the pose of somebody who has completed a great work. Behind and below him the woodland floor stretches away, and across all of it, drawn faintly in dotted outline, a hundred small circles marking the buried acorns. Palette of deep dusk orange and violet, squirrel gray, faint dotted cream. Keep the darkening sky at the top clean for text.",
+      "notes": "The dotted circles are visible to the reader and not to Pip. They return on page 9.",
+      "text_position": "top",
+      "paint_prompt": "Dusk, in the last orange light. Pip's fur is light gray and his satchel is tan. Palette of dusk orange, bark brown and soft gray.",
+      "line_prompt": "A small squirrel with a big fluffy tail and a tiny canvas satchel sits up tall on a tree stump, paws on his chest, chin up, tail curled behind him, very proud. The woodland floor behind him is covered in small dotted circles."
+    },
+    {
+      "n": 5,
+      "image": "page-05.png",
+      "en": "Winter came cold. By the fern, Pip dug down.\nThe hole was all empty. He looked all around.",
+      "zh": "冬天来到了，皮普去蕨边。\n挖呀挖呀挖，什么也不见。",
+      "prompt": "Winter. Cold blue-gray light, frost on everything, breath visible. A gray squirrel shoulder-deep in an empty hole beside a fern, soil sprayed out behind him, tail rigid with effort. And around him, filling the rest of the frame in every direction, at least fifteen more ferns, all completely identical to the one he chose. Palette of frost blue-gray, bare brown, dull fern green, one warm note in the squirrel. Keep the pale frozen ground along the bottom clean for text.",
+      "notes": "The joke is entirely in the picture: the text never says the ferns all look the same. Draw enough of them that the reader works it out.",
+      "line_prompt": "Winter. A small squirrel with a big fluffy tail and a tiny canvas satchel crouches with both front paws deep in an empty hole beside a fern, soil spraying out behind him. All around him are many more ferns, every one exactly the same as his fern. Bare branches, frosty ground."
+    },
+    {
+      "n": 6,
+      "image": "page-06.png",
+      "en": "He dug by the log and he found one. Hooray!\nIt was somebody else's. He ate it anyway.",
+      "zh": "木头下再挖，居然挖到啦！\n那是别人的——照样吃掉它。",
+      "prompt": "A gray squirrel sitting in the snow beside a fallen log with an acorn held in both paws, already eating, cheeks working, eyes half shut with pleasure. Beside the fresh hole, a small clear set of footprints in the frost that are not his — smaller, a different shape — and a discarded acorn cap that is not his either. He has not noticed and would not care. Palette of frost white and blue, log brown, acorn tan, squirrel gray. Keep the upper third of snow clean for text.",
+      "notes": "The other squirrel's footprints are the only clue that this is theft. Keep it quiet.",
+      "text_position": "top",
+      "line_prompt": "A small squirrel with a big fluffy tail and a tiny canvas satchel sits beside a fallen log, eating an acorn held in both paws, eyes half shut with pleasure. Tiny frost crystals on the ground and the log. Next to his fresh hole are a few small paw prints that are not his, and an empty acorn cap."
+    },
+    {
+      "n": 7,
+      "image": "page-07.png",
+      "en": "He dug thirty holes in the cold, frozen ground.\nEleven whole acorns were all that he found.",
+      "zh": "挖了三十个，土冻硬邦邦。\n一共十一颗，别的没找上。",
+      "prompt": "Overhead view of a wide patch of frozen woodland floor pocked with thirty small dark dug holes scattered across the white-blue frost, like craters. Down in one corner, small, one gray squirrel still digging, snow on his back. Beside him a tidy little pile of exactly eleven acorns. The emptiness of the rest of the frame does the work. Palette of frost white-blue, hole shadow brown, acorn tan. Keep the untouched frost along the bottom edge clean for text.",
+      "notes": "",
+      "line_prompt": "Seen from above: frozen woodland ground with many small round dug holes. In one corner, a small squirrel with a big fluffy tail and a tiny canvas satchel digs, next to a small pile of acorns."
+    },
+    {
+      "n": 8,
+      "image": "page-08.png",
+      "en": "Eleven was plenty. Eleven was fine.\nHe forgot all the rest. He forgot eighty-nine.",
+      "zh": "十一颗够啦，十一颗真妙。\n剩下八十九，一个没记牢。",
+      "prompt": "Warm interior of a squirrel's nest in a hollow oak trunk, seen through the round entrance hole from outside on a snowy night. Inside, lit by nothing but a slice of moonlight, a gray squirrel curled in a ball with his tail over his nose, fast asleep, eleven acorns neatly stacked beside him. Outside, deep snow, blue night, absolute stillness. Beneath the snow, drawn faintly as if cut away below ground, the eighty-nine forgotten acorns waiting in the dark. Palette of night blue, snow white, nest warm amber, faint gold underground. Keep the snowy foreground clean for text.",
+      "notes": "The underground cutaway is the pivot of the book. The reader now knows something Pip does not.",
+      "line_prompt": "A hollow inside an oak trunk. A small squirrel with a big fluffy tail and a tiny canvas satchel sleeps curled in a ball inside, tail over his nose, a few acorns beside him. Under the ground below the tree, many acorns lie buried in the soil like hidden treasure.",
+      "paint_prompt": "Winter, inside the hollow of an oak trunk, brown bark all around. Pip's fur is light gray and his satchel is tan. Dark brown soil below, with golden acorns in it. Palette of bark brown, soil brown and soft gray."
+    },
+    {
+      "n": 9,
+      "image": "page-09.png",
+      "en": "Then the snow melted off and the ground turned to mud,\nand under the ferns something pushed up. A bud.",
+      "zh": "春天雪化了，泥土软绵绵。\n蕨草底下呀，钻出小绿尖。",
+      "prompt": "Extreme close macro at soil level in spring. A single acorn, split open, with one thick pale root driving down and one bent green shoot pushing up through wet dark crumbly earth and last year's rotted leaves, its two first leaves still folded. Water beads on everything. Behind it, soft and out of focus, the pale green blur of new ferns. The first fully green page in the book after four cold ones. Palette of wet dark soil, new-shoot green, pale root cream. Keep the dark upper soil clean for text.",
+      "notes": "This must feel like a colour arriving. If pages 5 to 8 are cold enough, this page will do all the emotional work by itself.",
+      "text_position": "top",
+      "line_prompt": "Close-up at soil level in spring: one acorn split open, with a thick root growing down into the crumbly earth and a small bent shoot with two folded leaves pushing up. Rotted leaves and young ferns around it."
+    },
+    {
+      "n": 10,
+      "image": "page-10.png",
+      "en": "A small oak. Then another. Then nine more. Then ten.\nPip sits in one now. He's forgotten again.",
+      "zh": "一棵又一棵，长出小橡树。\n皮普坐树上，自己也糊涂。",
+      "prompt": "A wide bright view of the same patch of woodland a few years on, now filled with young oak trees — dozens of them, slim and vigorous, in full new leaf, standing exactly where the dotted circles were on page 4. Sunlight pouring through. Halfway up one of them, small and easy to miss, a fluffy-tailed gray squirrel with a tiny canvas satchel sitting on a branch, eating an acorn, with no idea at all. Palette of new oak green, gold light, pale bark. Keep the sunlit ground along the bottom clean for text.",
+      "notes": "Match the positions of the young oaks to the dotted circles on page 4 as closely as you can. That is the reward for reading it twice.",
+      "line_prompt": "Open woodland with many young oak trees with wavy oak leaves, spread out across the page. On a low branch of the nearest young oak sits a small squirrel with a big fluffy tail and a tiny canvas satchel, eating an acorn."
+    }
+  ]
+}

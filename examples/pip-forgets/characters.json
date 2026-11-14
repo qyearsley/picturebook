@@ -1,0 +1,28 @@
+{
+  "_comment": "The character bible for this book. Every prompt that shows a character repeats its description, so it looks the same on every page. `match` is a regular expression for how a line prompt names the character: paint sends a character's colours only to pages that match.",
+  "style_blocks": {
+    "color": "Children's picture book illustration in an ink and colored pencil style with warm, hand-drawn linework and soft paper texture, classic storybook art, vertical portrait orientation, clean negative space at top or bottom for text overlay.",
+    "line": "Children's coloring book page. Clean black ink line art on a pure white background, uniform medium-weight outlines, bold simple shapes with large open areas to color in. Flat and open, square composition. Hair, skin and clothing are drawn as empty outlines for a child to color in, never filled. No shading, no hatching, no cross-hatching, no grey tones, no color fill, no texture, no text.",
+    "paint": "Colour this black and white line drawing as a children's picture book illustration in an ink and colored pencil style, with warm hand-drawn linework and soft paper texture, classic storybook art. Keep every line, every shape and the whole composition exactly as drawn. Do not add, move or remove anything, and add no text."
+  },
+  "negative_prompts": {
+    "color": "text, lettering, watermark, signature, speech bubble, extra fingers, deformed hands, modern logo, readable sign",
+    "line": "color, colour, grey, gray, greyscale, shading, shadow, gradient, hatching, cross-hatching, texture, paint, watercolor, photorealistic, text, lettering, watermark, signature, extra fingers, deformed hands"
+  },
+  "characters": [
+    {
+      "id": "pip",
+      "name": {
+        "en": "Pip the Squirrel",
+        "zh": "小松鼠"
+      },
+      "description": "A fluffy-tailed light gray squirrel with a tiny tan canvas satchel on one strap across his body.",
+      "keep_consistent": [
+        "fluffy gray tail",
+        "tiny canvas satchel"
+      ],
+      "match": "\\b(?:squirrel|pip)\\b",
+      "role": "The only character. A squirrel who buries acorns and forgets them."
+    }
+  ]
+}

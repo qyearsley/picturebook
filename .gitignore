@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.ruff_cache/
+dist/
+
+# Everything a book makes. No image or PDF is committed: see the README.
+build/
+print/
+images/
+pick.html
+text-and-prompts.md
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.pdf
+
+.DS_Store
+.env*
