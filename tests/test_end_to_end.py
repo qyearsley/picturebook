@@ -98,3 +98,41 @@ class CliTest(unittest.TestCase):
     def test_unknown_command_exits(self):
         with self.assertRaises(SystemExit):
             run("nope")
+
+
+class ReplicateFailureTest(unittest.TestCase):
+    """Paid-for work is never lost or wrongly cached. No network is used."""
+
+    def test_download_failure_names_the_url(self):
+        import urllib.error
+        from unittest import mock
+
+        from picturebook import backends
+
+        err = urllib.error.URLError("connection reset")
+        with mock.patch("urllib.request.urlopen", side_effect=err), \
+                mock.patch("time.sleep"):
+            with self.assertRaises(backends.PredictionFailed) as caught:
+                backends.download("https://replicate.delivery/x.png")
+        self.assertIn("https://replicate.delivery/x.png", str(caught.exception))
+
+    def test_a_reply_with_no_image_is_not_cached(self):
+        from unittest import mock
+
+        from picturebook import backends
+
+        with tempfile.TemporaryDirectory() as tmp:
+            book = Path(tmp) / "pip-forgets"
+            shutil.copytree(EXAMPLE, book, ignore=shutil.ignore_patterns("images", "build"))
+
+            def empty(self, job, out_dir):
+                return backends.Result(job=job, note="no image returned (failed)")
+
+            with mock.patch.object(backends.ReplicateBackend, "submit", empty):
+                with self.assertRaises(SystemExit) as caught:
+                    run("generate", str(book), "--backend", "replicate", "--style", "line",
+                        "--pages", "1")
+            self.assertEqual(caught.exception.code, 1)
+            cache = book / "images" / ".generate-cache.json"
+            entries = json.loads(cache.read_text()) if cache.exists() else {}
+            self.assertEqual(entries, {})

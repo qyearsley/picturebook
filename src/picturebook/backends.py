@@ -24,6 +24,12 @@ import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import __version__
+
+USER_AGENT = f"picturebook/{__version__}"
+# Download attempts for a finished image. The prediction is already paid for.
+DOWNLOAD_TRIES = 3
+
 # Where a backend looks for its key, in order: the environment, then the
 # macOS Keychain.
 CREDENTIALS = {
@@ -33,6 +39,27 @@ CREDENTIALS = {
 
 class PredictionFailed(Exception):
     """One prediction failed or timed out. The run can go on to the next page."""
+
+
+def download(url: str) -> bytes:
+    """Fetch a finished image, with retries.
+
+    The prediction is paid for by now, so a failure must not be silent. If
+    every try fails, the URL goes into the error: Replicate keeps the file for
+    about an hour, so you can still download it by hand.
+    """
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    for attempt in range(DOWNLOAD_TRIES):
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:
+                return response.read()
+        except (urllib.error.URLError, TimeoutError) as err:
+            if attempt == DOWNLOAD_TRIES - 1:
+                raise PredictionFailed(
+                    f"the image was made but the download failed ({err}).\n"
+                    f"       Download it by hand within an hour: {url}") from None
+            time.sleep(2 * (attempt + 1))
+    raise AssertionError("unreachable")
 
 
 def free_path(out_dir: Path, stem: str) -> Path:
@@ -218,11 +245,11 @@ class ReplicateBackend(Backend):
         data = json.dumps(payload).encode("utf-8") if payload is not None else None
         request = urllib.request.Request(
             url, data=data, method="POST" if data else "GET",
-            # Without a User-Agent, model lookups came back 403 on 4 October
-            # 2026, though predictions worked. Sent always, to be safe.
+            # Without a User-Agent, model lookups came back 403, though
+            # predictions worked. Sent always, to be safe.
             headers={"Authorization": f"Bearer {key}",
                      "Content-Type": "application/json",
-                     "User-Agent": "books-generate-images/1.0"},
+                     "User-Agent": USER_AGENT},
         )
         for attempt in range(self.THROTTLE_RETRIES + 1):
             try:
@@ -288,8 +315,7 @@ class ReplicateBackend(Backend):
         files = []
         for url in output:
             path = free_path(out_dir, stem)
-            with urllib.request.urlopen(url, timeout=120) as response:
-                path.write_bytes(response.read())
+            path.write_bytes(download(url))
             files.append(path)
         return Result(job=job, files=files, job_id=prediction.get("id", ""),
                       note=f"{len(files)} file(s)")

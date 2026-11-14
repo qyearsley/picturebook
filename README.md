@@ -15,15 +15,19 @@ You need Python 3.10 or later.
 git clone https://github.com/qyearsley/picturebook
 cd picturebook
 python3 -m venv .venv
-.venv/bin/pip install -e .
+source .venv/bin/activate
+pip install -e .
 ```
+
+The commands below assume the venv is active. In a new terminal, run
+`source .venv/bin/activate` again.
 
 Build the example book with placeholder art:
 
 ```
-.venv/bin/picturebook placeholders examples/pip-forgets
-.venv/bin/picturebook pdf examples/pip-forgets
-.venv/bin/picturebook reader examples/pip-forgets
+picturebook placeholders examples/pip-forgets
+picturebook pdf examples/pip-forgets
+picturebook reader examples/pip-forgets
 ```
 
 The PDF and the reader are in `examples/pip-forgets/build/`. Open
@@ -47,22 +51,52 @@ The PDF and the reader are in `examples/pip-forgets/build/`. Open
 
 Run `picturebook <command> --help` for the options of a command.
 
+## Make a book with no pictures
+
+The draw-in editions print the words with an empty box where each picture
+goes. A child draws the pictures.
+
+```
+picturebook print examples/pip-forgets --only draw-in
+```
+
+The PDFs are in `print/pip-forgets/`, and `print/README.txt` says how to print
+each one.
+
 ## Use your own pictures
 
 Put one image per page in the book's `images/` folder. Name them `cover.png`,
-`page-01.png`, `page-02.png`, and so on. Or let `import` file them for you:
+`page-01.png`, `page-02.png`, and so on.
+
+Or let `import` name them for you. First run it with no mapping. It copies the
+files into `images/_incoming/`, writes a contact sheet, and proposes a mapping.
+It files nothing yet:
 
 ```
-.venv/bin/picturebook import examples/pip-forgets ~/my-pictures
+picturebook import examples/pip-forgets ~/my-pictures
 ```
+
+Then file them with the mapping it printed, edited as you like:
+
+```
+picturebook import examples/pip-forgets --map "cover=IMG_0001.png,1=IMG_0002.png"
+```
+
+Or file the files in order, oldest file first, with `--by-order`. A file that
+the book already has is moved to `images/_replaced/`, never deleted.
 
 ## Generate pictures
 
+The art comes in two steps. Line art comes first. Colour is then painted onto
+the picked line art, so both keep the same composition. Each step generates
+candidates, you pick one per page, and `import` files the picks.
+
 The `manual` backend calls no service. It writes one prompt per page to
-`images/_incoming/_queue.md`, for you to paste into any image service:
+`images/_incoming/_queue.md`, for you to paste into any image service. Save
+the results into `images/_incoming/`, then file them with `import` as above:
 
 ```
-.venv/bin/picturebook generate examples/pip-forgets --style line
+picturebook generate examples/pip-forgets --style line
 ```
 
 The `replicate` backend calls [Replicate](https://replicate.com). It costs
@@ -70,13 +104,24 @@ money. Set `REPLICATE_API_TOKEN` first. Try a few pages before you send a whole
 book:
 
 ```
-.venv/bin/picturebook generate examples/pip-forgets --backend replicate \
+picturebook generate examples/pip-forgets --backend replicate \
   --model flux-schnell --style line --pages 1,2 --seeds 1234,1235 --delay 11
 ```
 
-Then open `pick.html`, choose one candidate per page, and run the `import`
-command that the page gives you. See `docs/prompt-sheet.md` for how to write a
-prompt.
+At the end, the run writes `pick.html` in the folder that holds the book, here
+`examples/pick.html`. Open it, choose one candidate per page, and copy the
+commands from the box at the bottom. Run them from that folder.
+
+To paint the picked line art, generate with `--style paint`, then pick, and
+file the picks with `import --color`. Build with `pdf --color` to use the
+colour art.
+
+`--delay 11` keeps under Replicate's limit of 6 predictions a minute, which
+applies while an account has less than $5 of credit. An interrupted run can
+start again: the cache in `images/.generate-cache.json` skips pages that are
+already done.
+
+See `docs/prompt-sheet.md` for how to write a prompt.
 
 ## No images in this repo
 

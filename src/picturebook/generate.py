@@ -445,6 +445,11 @@ def run(project: Path, args: argparse.Namespace) -> int:
             failed.append(job.page)
             continue
         results.append(result)
+        if not result.files and backend.name != "manual":
+            # Nothing came back, so nothing is cached: a rerun tries again.
+            print(f"  {job.image:<16} FAILED: {result.note}")
+            failed.append(job.page)
+            continue
         cache[key] = {
             "page": job.page,
             "image": job.image,

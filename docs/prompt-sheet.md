@@ -5,12 +5,12 @@ direction.
 
 ## The shape of a prompt
 
-The export script puts the master style block on the front of every prompt for
-you. What you write in the page's `prompt` field is everything after it, in
-this order:
+The tool puts the master style block on the front of every prompt for you.
+What you write in the page's `prompt` field is everything after it, in this
+order:
 
 ```
-<camera and composition>  <the subject, doing something>  <light>  <palette>  <character blocks>  <one background detail>  <where the negative space goes>
+<camera and composition>  <the subject, doing something>  <light>  <palette>  <character description>  <one background detail>  <where the negative space goes>
 ```
 
 Every one of those seven parts earns its place. A prompt that names only the
@@ -20,18 +20,18 @@ the light and the colour for you, and it chooses differently every time.
 Weak:
 
 ```
-A 5-year-old boy pointing excitedly at a giant gray boulder.
+A squirrel burying an acorn in the woods.
 ```
 
 Strong:
 
 ```
-Low worm's-eye angle from the creek floor looking up at an enormous rounded
-gray granite boulder that fills most of the frame, lichen-blotched in pale
-green and rust. The two children are tiny at the bottom edge, seen from
-behind, heads tipped back. Strong midday light, hard shadow pooling under the
-rock. Palette of granite gray, lichen green, dust gold. Keep the top of the
-frame open sky for text.
+Low ground-level view across the autumn woodland floor. A fluffy-tailed light
+gray squirrel with a tiny tan canvas satchel digs a small hole with both paws,
+an acorn held in its mouth, tail curled high. Low golden afternoon light, long
+shadows through the oak trunks. Palette of russet leaf litter, bark brown, gold
+light. One fern stands beside the hole. Keep the top of the frame open for
+text.
 ```
 
 ## Camera and composition
@@ -58,7 +58,7 @@ Give three or four colours and one accent. Naming the palette is what makes
 ten pages look like one book. It is also how you make a page land: on Pip
 Forgets page 9 the whole effect is that green arrives after four cold pages.
 
-## Character blocks
+## Character description
 
 Each character's description is in the book's `characters.json`. Copy it exactly,
 and do not reword it between pages. If a character drifts between pages, add

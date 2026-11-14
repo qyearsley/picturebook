@@ -89,7 +89,7 @@ DEFAULT_PINYIN_FONTS = [
     "/System/Library/Fonts/Supplemental/Georgia.ttf",
     "C:/Windows/Fonts/arial.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-    "Helvetica",
+    "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
 ]
 # Pinyin is this fraction of the Chinese type size.
 PINYIN_RATIO = 0.5
@@ -107,8 +107,8 @@ CJK_RANGES = HAN_RANGES + (
 # --------------------------------------------------------------------------
 
 # A trim size and the layout fields that depend on it, kept together on
-# purpose. ROADMAP.md records why: if you change only the page size, the PDF
-# still builds and the type silently shrinks to fit the narrower column.
+# purpose: if you change only the page size, the PDF still builds and the type
+# silently shrinks to fit the narrower column.
 #
 # `en` and `zh` are type sizes. Leading is derived from them at the ratios the
 # books already use, 1.34 for English and 1.6 for Chinese.
@@ -1032,6 +1032,10 @@ def build(project: Path, out: Path | None, cover: bool, draft: bool,
         "zh": resolve_font("BookZH", data["fonts"]["zh"], fallback="STSong-Light"),
         "py": resolve_font("BookPY", data["fonts"].get("pinyin", DEFAULT_PINYIN_FONTS)),
     }
+    if fonts["py"] in BUILTIN_FONTS:
+        print(f"  warning: the pinyin font is {fonts['py']}, which cannot print tone marks"
+              " such as ǎ.\n           Set fonts.pinyin in book-data.json to a .ttf that has"
+              " them, such as DejaVu Sans.", file=sys.stderr)
 
     if booklet:
         c = BookletCanvas(str(out), (page_w, page_h))
