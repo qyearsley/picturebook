@@ -30,7 +30,7 @@ from .generate import aspect_ratio, parse_pages, shared_data
 # Described, not named after an artist or a film, so the look comes from the
 # words and nothing is borrowed by name.
 STYLES = {
-    "house": None,  # the shared colour block, as the other books use
+    "house": None,  # the book's own colour block from characters.json
     "watercolour": (
         "Children's picture book illustration in loose, scratchy pen and ink "
         "with splashy watercolour washes. Energetic wobbly lines, lots of white "

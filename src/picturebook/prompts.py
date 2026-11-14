@@ -6,7 +6,7 @@ Usage:
 The markdown is generated from book-data.json, so the two never drift. Edit
 the JSON, then run this again. Do not edit the markdown by hand.
 
-The V5 layout is built for browsing a story fast. It has four sections:
+The layout is built for browsing a story fast. It has four sections:
 
     1. A one or two sentence synopsis, plus a one-line facts strip.
     2. The whole English text, page by page, with no Chinese in the way.
