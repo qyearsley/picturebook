@@ -50,7 +50,7 @@ class ExampleBookTest(unittest.TestCase):
             self.assertEqual(img.width, img.height, "the example book wants square art")
         run("pdf", str(self.book), "--variant", "all")
         run("reader", str(self.book))
-        html = (self.book / "build" / "index.html").read_text(encoding="utf-8")
+        html = (self.book / "build" / "reader" / "index.html").read_text(encoding="utf-8")
         self.assertIn("<ruby>", html)
         self.assertIn("Pip Forgets", html)
 
@@ -136,3 +136,49 @@ class ReplicateFailureTest(unittest.TestCase):
             cache = book / "images" / ".generate-cache.json"
             entries = json.loads(cache.read_text()) if cache.exists() else {}
             self.assertEqual(entries, {})
+
+
+class ReaderEditionTest(unittest.TestCase):
+    def test_each_edition_has_its_own_folder_and_no_stale_images(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            book = Path(tmp) / "pip-forgets"
+            shutil.copytree(EXAMPLE, book, ignore=shutil.ignore_patterns("images", "build"))
+            run("placeholders", str(book))
+            color = book / "images" / "color"
+            color.mkdir()
+            for png in (book / "images").glob("*.png"):
+                shutil.copy2(png, color / png.name)
+            run("reader", str(book))
+            run("reader", str(book), "--color", "--web")
+            line = {p.name for p in (book / "build" / "reader" / "images").iterdir()}
+            web = {p.name for p in (book / "build" / "reader-color-web" / "images").iterdir()}
+            self.assertIn("page-01.png", line)
+            self.assertIn("page-01.jpg", web)
+            self.assertFalse(any(n.endswith(".png") for n in web))
+            # A page that loses its art also loses its stale copy.
+            (book / "images" / "page-02.png").unlink()
+            run("reader", str(book))
+            self.assertNotIn("page-02.png",
+                             {p.name for p in (book / "build" / "reader" / "images").iterdir()})
+
+
+class PickPageTest(unittest.TestCase):
+    def test_pick_html_goes_in_the_current_folder_with_relative_paths(self):
+        import os
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            book = root / "My Books" / "Pip Forgets"
+            shutil.copytree(EXAMPLE, book, ignore=shutil.ignore_patterns("images", "build"))
+            incoming = book / "images" / "_incoming"
+            incoming.mkdir(parents=True)
+            (incoming / "page-01.1.png").write_bytes(b"x")
+            old = os.getcwd()
+            os.chdir(root)
+            try:
+                run("pick", "My Books/Pip Forgets")
+            finally:
+                os.chdir(old)
+            html = (root / "pick.html").read_text(encoding="utf-8")
+            self.assertIn('"book": "My Books/Pip Forgets"', html)
+            self.assertIn("My Books/Pip Forgets/images/_incoming/page-01.1.png", html)

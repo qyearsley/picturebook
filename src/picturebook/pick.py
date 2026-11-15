@@ -4,7 +4,10 @@ Usage:
     picturebook pick BOOK [BOOK ...]
 
 Scans `images/_incoming` and `images/color/_incoming` in each book, and writes
-pick.html in the folder that holds the books. A page shows up when it has a variant newer than the image filed
+pick.html in the current folder. Its paths and commands are relative to that
+folder, so run the commands from where you ran `generate` or `pick`. If a book
+is outside the current folder, pick.html goes in the folder that holds the
+books instead. A page shows up when it has a variant newer than the image filed
 for it, so a page drops off the list once a pick is imported. Colour rows are
 labelled as such, and their commands carry `--color`.
 
@@ -55,7 +58,13 @@ def page_entries(project: Path) -> dict[str, dict]:
 
 
 def root_of(projects: list[Path]) -> Path:
-    """The folder that holds all the books. pick.html goes here."""
+    """Where pick.html goes: the current folder, if it holds every book.
+
+    Otherwise the folder that holds all the books.
+    """
+    cwd = Path.cwd().resolve()
+    if all(p.is_relative_to(cwd) for p in projects):
+        return cwd
     return Path(os.path.commonpath([p.parent for p in projects]))
 
 
@@ -165,7 +174,9 @@ const state = saved.__build === BUILD ? saved : {__build: BUILD};
 const showOld = document.getElementById("showold");
 showOld.onchange = () => document.body.classList.toggle("show-old", showOld.checked);
 const id = r => r.book + ":" + r.page + (r.color ? ":color" : "");
-const group = r => r.book + (r.color ? " --color" : "");
+const group = r => r.book + (r.color ? "\\t--color" : "");
+// Quote a path for the shell if it has anything but safe characters.
+const q = s => /^[\\w\\/.\\-]+$/.test(s) ? s : "'" + s.replace(/'/g, "'\\\\''") + "'";
 const base = p => p.split("/").pop();
 const esc = s => s.replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[c]);
 const rowsEl = document.getElementById("rows");
@@ -233,14 +244,14 @@ function render() {
   }
   const lines = [];
   for (const [g, m] of Object.entries(picks)) {
-    const [b, flag] = g.split(" ");
-    lines.push(`picturebook import ${b} --map "${m.join(",")}"${flag ? " " + flag : ""}`);
+    const [b, flag] = g.split("\\t");
+    lines.push(`picturebook import ${q(b)} --map "${m.join(",")}"${flag ? " " + flag : ""}`);
   }
   // A filed image newer than its variants drops the page off this list.
-  if (keeps.length) lines.push(`touch ${keeps.join(" ")}`);
+  if (keeps.length) lines.push(`touch ${keeps.map(q).join(" ")}`);
   document.getElementById("cmd").value = lines.join("\\n");
   // Rejects are a to-do list, not commands, so they stay out of the Copy box.
-  const todo = Object.entries(redo).map(([b, p]) => `${b}: pages ${p.join(",")}`);
+  const todo = Object.entries(redo).map(([b, p]) => `${b.replace("\\t", " ")}: pages ${p.join(",")}`);
   document.getElementById("redo").textContent =
     todo.length ? "To regenerate (not commands):\\n" + todo.join("\\n") : "";
 }

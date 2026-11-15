@@ -8,13 +8,12 @@
 4. `import` mishandles some pictures — S · open
 5. Commands crash with tracebacks on bad input — S · open
 6. Costly or surprising defaults in `generate` and `styles` — S · open
-7. `pick.html` commands break on folder names with spaces — S · open
-8. The manual backend writes cache entries — S · open
-9. `text-positions` clears values set by hand — S · open
-10. The print README text assumes a 10-page book — S · open
-11. Pre-commit hooks assume `./.venv` — S · open
-12. CI does not run `generate`, `pick` or `import` — S · open
-13. Placeholder footer text hides under the text band — S · open
+7. The manual backend writes cache entries — S · open
+8. `text-positions` clears values set by hand — S · open
+9. The print README text assumes a 10-page book — S · open
+10. Pre-commit hooks assume `./.venv` — S · open
+11. CI does not run `generate`, `pick` or `import` — S · open
+12. Placeholder footer text hides under the text band — S · open
 
 ## 1. Book files need every layout and font field
 
@@ -53,36 +52,31 @@ which a plain `import` and `pdf` do not read. `styles` with no flags sends 60
 predictions to `flux-1.1-pro`, and asks for page 9 even in a shorter book.
 `styles` also ignores a style block set in `book-data.json`.
 
-## 7. `pick.html` commands break on folder names with spaces
-
-The page splits the book path on spaces, so "Pip Forgets" gives a broken
-command. Quote the path.
-
-## 8. The manual backend writes cache entries
+## 7. The manual backend writes cache entries
 
 A manual run reports "11 sent", and a rerun "11 cached", though nothing was
 made.
 
-## 9. `text-positions` clears values set by hand
+## 8. `text-positions` clears values set by hand
 
 It removes `text_position` from every page whose `Keep` sentence does not ask
 for the top, and rewrites the file with no backup.
 
-## 10. The print README text assumes a 10-page book
+## 9. The print README text assumes a 10-page book
 
 "Each book is 3 sheets" is fixed text in `editions.py`.
 
-## 11. Pre-commit hooks assume `./.venv`
+## 10. Pre-commit hooks assume `./.venv`
 
 The local hooks call `.venv/bin/ruff` and `.venv/bin/python`. The README
 installs without `[dev]` and never mentions `pre-commit install`.
 
-## 12. CI does not run `generate`, `pick` or `import`
+## 11. CI does not run `generate`, `pick` or `import`
 
 The end-to-end tests build PDFs and the reader only. There is also no Linux
 job without fonts, which is where the font fallbacks matter.
 
-## 13. Placeholder footer text hides under the text band
+## 12. Placeholder footer text hides under the text band
 
 "PLACEHOLDER — replace with final art" sits near the bottom of the image, where
 the overlay band covers it.

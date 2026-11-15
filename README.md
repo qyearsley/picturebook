@@ -31,7 +31,7 @@ picturebook reader examples/pip-forgets
 ```
 
 The PDF and the reader are in `examples/pip-forgets/build/`. Open
-`build/index.html` in a browser.
+`build/reader/index.html` in a browser.
 
 ## Commands
 
@@ -108,9 +108,9 @@ picturebook generate examples/pip-forgets --backend replicate \
   --model flux-schnell --style line --pages 1,2 --seeds 1234,1235 --delay 11
 ```
 
-At the end, the run writes `pick.html` in the folder that holds the book, here
-`examples/pick.html`. Open it, choose one candidate per page, and copy the
-commands from the box at the bottom. Run them from that folder.
+At the end, the run writes `pick.html` in the current folder. Open it, choose
+one candidate per page, and copy the commands from the box at the bottom. Run
+them from the same folder.
 
 To paint the picked line art, generate with `--style paint`, then pick, and
 file the picks with `import --color`. Build with `pdf --color` to use the

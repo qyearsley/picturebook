@@ -304,7 +304,9 @@ def build(project: Path, out: Path | None, copy_images: bool, sandhi: bool = Tru
     art = images_dir(project, color)
     build_dir = project / "build"
     build_dir.mkdir(parents=True, exist_ok=True)
-    out = out or build_dir / "index.html"
+    # Each edition gets its own folder, so a colour build never replaces the
+    # line build's images, and a JPEG build leaves no PNGs behind.
+    out = out or build_dir / edition_dir(color, web) / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
 
     wanted = [p["image"] for p in data.get("pages", []) if p.get("image")]
@@ -316,13 +318,21 @@ def build(project: Path, out: Path | None, copy_images: bool, sandhi: bool = Tru
     if copy_images:
         target = out.parent / "images"
         target.mkdir(parents=True, exist_ok=True)
+        written = set()
         for name in sorted(available):
             if web:
                 with Image.open(art / name) as img:
                     img.convert("RGB").save(target / web_name(name), "JPEG",
                                             quality=WEB_JPEG_QUALITY, optimize=True)
+                written.add(web_name(name))
             else:
                 shutil.copy2(art / name, target / name)
+                written.add(name)
+        # A page whose art was removed, or an older build's format, would
+        # otherwise linger beside the new files.
+        for old in target.iterdir():
+            if old.is_file() and old.name not in written:
+                old.unlink()
         prefix = "images/"
         if web:
             # The parsed copy only: book-data.json keeps its PNG names.
@@ -342,6 +352,11 @@ def build(project: Path, out: Path | None, copy_images: bool, sandhi: bool = Tru
     return out
 
 
+def edition_dir(color: bool, web: bool) -> str:
+    """build/reader, build/reader-color, build/reader-color-web, ..."""
+    return "-".join(["reader"] + (["color"] if color else []) + (["web"] if web else []))
+
+
 def web_name(name: str) -> str:
     """page-01.png -> page-01.jpg"""
     return str(Path(name).with_suffix(".jpg"))
@@ -350,7 +365,8 @@ def web_name(name: str) -> str:
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description="Build an HTML reader with pinyin ruby text.")
     ap.add_argument("project", nargs="?", default=".", type=Path, help="project directory (default: cwd)")
-    ap.add_argument("--out", type=Path, help="output HTML path (default: <project>/build/index.html)")
+    ap.add_argument("--out", type=Path, help="output HTML path (default: <project>/build/reader/index.html,"
+                         " or reader-color, reader-web, reader-color-web)")
     ap.add_argument("--no-copy-images", action="store_true",
                     help="link to ../images instead of copying into build/")
     ap.add_argument("--no-sandhi", action="store_true",
