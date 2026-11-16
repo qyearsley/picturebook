@@ -415,8 +415,9 @@ def run(project: Path, args: argparse.Namespace) -> int:
     if cache_file.exists():
         cache = json.loads(cache_file.read_text(encoding="utf-8"))
 
+    seed = f", seed {args.seed}" if args.seed is not None else ""
     print(f"\n=== {project.name} — {len(jobs)} page(s), {jobs[0].aspect}, "
-          f"{args.style} art, backend {args.backend} ===")
+          f"{args.style} art, backend {args.backend}{seed} ===")
 
     if args.dry_run:
         for job in jobs:

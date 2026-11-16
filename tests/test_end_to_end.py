@@ -65,6 +65,12 @@ class ExampleBookTest(unittest.TestCase):
         queue = self.book / "images" / "_incoming" / "_queue.md"
         self.assertIn("squirrel", queue.read_text(encoding="utf-8"))
 
+    def test_dry_run_names_each_seed(self):
+        out = run("generate", str(self.book), "--style", "line", "--backend", "replicate",
+                  "--seeds", "1234,1235", "--pages", "1", "--dry-run")
+        self.assertIn("seed 1234", out)
+        self.assertIn("seed 1235", out)
+
     def test_prompts_and_check(self):
         run("prompts", str(self.book))
         self.assertTrue((self.book / "text-and-prompts.md").exists())
