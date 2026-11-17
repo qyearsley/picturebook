@@ -14,6 +14,7 @@
 10. Pre-commit hooks assume `./.venv` — S · open
 11. CI does not run `generate`, `pick` or `import` — S · open
 12. Placeholder footer text hides under the text band — S · open
+13. Characters drift between pages in text-only colour runs — M · open
 
 ## 1. Book files need every layout and font field
 
@@ -80,3 +81,13 @@ job without fonts, which is where the font fallbacks matter.
 
 "PLACEHOLDER — replace with final art" sits near the bottom of the image, where
 the overlay band covers it.
+
+## 13. Characters drift between pages in text-only colour runs
+
+`generate --style color` sends text only, so FLUX redraws each character from
+the words on every page. Faces, facial hair, heights and the head count
+drift, and attributes bleed between characters (a boy gets the girl's
+headband). Option: a reference-image backend that sends one picked portrait
+per character with the page prompt, through a multi-image editing model.
+Check the model names and prices on Replicate before building it.
+
