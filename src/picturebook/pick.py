@@ -34,6 +34,7 @@ import argparse
 import json
 import os
 import re
+import sys
 import time
 from pathlib import Path
 
@@ -167,6 +168,7 @@ page to regenerate.</p>
 <script>
 const ROWS = __ROWS__;
 const BUILD = __BUILD__;
+const CMD = __CMD__;
 const KEY = "pick-state";
 // Picks from an earlier build of this page name files that may be gone.
 const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
@@ -245,7 +247,7 @@ function render() {
   const lines = [];
   for (const [g, m] of Object.entries(picks)) {
     const [b, flag] = g.split("\\t");
-    lines.push(`picturebook import ${q(b)} --map "${m.join(",")}"${flag ? " " + flag : ""}`);
+    lines.push(`${q(CMD)} import ${q(b)} --map "${m.join(",")}"${flag ? " " + flag : ""}`);
   }
   // A filed image newer than its variants drops the page off this list.
   if (keeps.length) lines.push(`touch ${keeps.map(q).join(" ")}`);
@@ -260,6 +262,17 @@ render();
 """
 
 
+def command_path() -> str:
+    """The `picturebook` to put in the import commands.
+
+    A bare `picturebook` fails in a shell where the venv is not active. The
+    console script sits beside the interpreter that runs this code, so use
+    its full path when it is there.
+    """
+    script = Path(sys.executable).parent / "picturebook"
+    return str(script) if script.exists() else "picturebook"
+
+
 def write_pick_page(projects: list[Path]) -> Path:
     projects = [p.expanduser().resolve() for p in projects]
     root = root_of(projects)
@@ -268,6 +281,7 @@ def write_pick_page(projects: list[Path]) -> Path:
     data = json.dumps(rows).replace("</", "<\\/")
     page = (PAGE.replace("__ROWS__", data)
             .replace("__BUILD__", json.dumps(str(time.time())))
+            .replace("__CMD__", json.dumps(command_path()))
             .replace("__ROOT__", str(root)))
     out = root / OUT_NAME
     out.write_text(page, encoding="utf-8")

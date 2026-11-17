@@ -80,9 +80,3 @@ job without fonts, which is where the font fallbacks matter.
 
 "PLACEHOLDER — replace with final art" sits near the bottom of the image, where
 the overlay band covers it.
-
-## 13. `pick.html` commands fail outside an activated venv
-
-The import commands start with a bare `picturebook`. In a shell without the
-venv active they fail with "command not found". Suggest: write the path of the
-running executable (`sys.argv[0]`, resolved) into the commands.

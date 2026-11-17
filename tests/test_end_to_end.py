@@ -188,3 +188,20 @@ class PickPageTest(unittest.TestCase):
             html = (root / "pick.html").read_text(encoding="utf-8")
             self.assertIn('"book": "My Books/Pip Forgets"', html)
             self.assertIn("My Books/Pip Forgets/images/_incoming/page-01.1.png", html)
+            # The import commands must run in a shell without the venv active.
+            from picturebook.pick import command_path
+            self.assertIn(f"const CMD = {json.dumps(command_path())};", html)
+
+    def test_command_path_is_the_script_beside_the_interpreter(self):
+        import sys
+        from unittest import mock
+
+        from picturebook.pick import command_path
+
+        with tempfile.TemporaryDirectory() as tmp:
+            bin_dir = Path(tmp).resolve()
+            (bin_dir / "python").write_text("")
+            with mock.patch.object(sys, "executable", str(bin_dir / "python")):
+                self.assertEqual(command_path(), "picturebook")
+                (bin_dir / "picturebook").write_text("")
+                self.assertEqual(command_path(), str(bin_dir / "picturebook"))
