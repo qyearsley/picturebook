@@ -191,6 +191,12 @@ class PickPageTest(unittest.TestCase):
             # The import commands must run in a shell without the venv active.
             from picturebook.pick import command_path
             self.assertIn(f"const CMD = {json.dumps(command_path())};", html)
+            # The commands cd to the root first, so they run from any folder.
+            self.assertIn(f"const ROOT = {json.dumps(str(root))};", html)
+            self.assertIn("`cd ${q(ROOT)}`", html)
+            # Commands and the redo list copy separately.
+            self.assertIn('id="copy-cmd"', html)
+            self.assertIn('id="copy-redo"', html)
 
     def test_command_path_is_the_script_beside_the_interpreter(self):
         import sys

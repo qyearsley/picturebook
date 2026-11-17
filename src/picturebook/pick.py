@@ -15,7 +15,9 @@ Click a variant to pick it, "keep current" to keep the filed image, or "none
 good" to mark the page for another try.
 The box at the bottom turns the picks into `picturebook import --map` commands,
 one per book. The rejects are listed below the box as a to-do, not as
-commands. Copy takes both. Each row shows the page's verse and its prompt.
+commands. Each has its own Copy button. The commands start by changing to
+the root folder, so they run from anywhere. Each row shows the page's verse
+and its prompt.
 
 Variants are newest first, and the ones from the latest run are marked "new".
 A colour row also shows the drawing filed for the page. A colour variant older
@@ -159,8 +161,9 @@ page to regenerate.</p>
 <label><input type="checkbox" id="showold"> show variants from older drawings</label>
 <div id="rows"></div>
 <div id="out">
-  <b>Commands</b> (run from __ROOT__)
-  <button onclick="navigator.clipboard.writeText([document.getElementById('cmd').value, document.getElementById('redo').textContent].filter(Boolean).join('\\n\\n'))">Copy</button>
+  <b>Commands</b> (they start with a cd to __ROOT__)
+  <button id="copy-cmd" onclick="copyText('cmd')">Copy commands</button>
+  <button id="copy-redo" onclick="copyText('redo')">Copy redo list</button>
   <button onclick="localStorage.removeItem(KEY); location.reload()">Clear picks</button>
   <textarea id="cmd" readonly></textarea>
   <div id="redo"></div>
@@ -169,6 +172,7 @@ page to regenerate.</p>
 const ROWS = __ROWS__;
 const BUILD = __BUILD__;
 const CMD = __CMD__;
+const ROOT = __ROOTJSON__;
 const KEY = "pick-state";
 // Picks from an earlier build of this page name files that may be gone.
 const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
@@ -251,11 +255,16 @@ function render() {
   }
   // A filed image newer than its variants drops the page off this list.
   if (keeps.length) lines.push(`touch ${keeps.map(q).join(" ")}`);
+  if (lines.length) lines.unshift(`cd ${q(ROOT)}`);
   document.getElementById("cmd").value = lines.join("\\n");
   // Rejects are a to-do list, not commands, so they stay out of the Copy box.
   const todo = Object.entries(redo).map(([b, p]) => `${b.replace("\\t", " ")}: pages ${p.join(",")}`);
   document.getElementById("redo").textContent =
     todo.length ? "To regenerate (not commands):\\n" + todo.join("\\n") : "";
+}
+function copyText(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.value !== undefined ? el.value : el.textContent);
 }
 render();
 </script>
@@ -282,6 +291,7 @@ def write_pick_page(projects: list[Path]) -> Path:
     page = (PAGE.replace("__ROWS__", data)
             .replace("__BUILD__", json.dumps(str(time.time())))
             .replace("__CMD__", json.dumps(command_path()))
+            .replace("__ROOTJSON__", json.dumps(str(root)).replace("</", "<\\/"))
             .replace("__ROOT__", str(root)))
     out = root / OUT_NAME
     out.write_text(page, encoding="utf-8")
