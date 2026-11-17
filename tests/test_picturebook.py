@@ -131,6 +131,10 @@ class PinyinTest(unittest.TestCase):
         self.assertEqual(readings("星期一。"), "xīng qī yī")
         self.assertEqual(readings("十一"), "shí yī")
 
+    def test_yi_between_a_doubled_verb_is_neutral(self):
+        self.assertEqual(readings("找一找"), "zhǎo yi zhǎo")
+        self.assertEqual(readings("看一看"), "kàn yi kàn")
+
     def test_bu_changes_only_before_a_fourth_tone(self):
         self.assertEqual(readings("不见"), "bú jiàn")
         self.assertEqual(readings("不停"), "bù tíng")

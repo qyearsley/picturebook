@@ -93,6 +93,8 @@ def _apply_yi_bu(run: str, syllables: list[str], claimed: list[bool]) -> None:
             syllables[i] = "bú" if next_tone == 4 else "bù"
         elif i > 0 and run[i - 1] in YI_STAYS:
             syllables[i] = "yī"
+        elif i > 0 and run[i - 1] == run[i + 1]:
+            syllables[i] = "yi"  # 看一看: a doubled verb takes a neutral yi.
         elif next_tone == 4:
             syllables[i] = "yí"
         elif next_tone:
