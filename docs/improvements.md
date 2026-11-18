@@ -6,7 +6,7 @@
 2. Docs are one README — M · open
 3. Costly or surprising defaults in `generate` and `styles` — S · open
 4. Pre-commit hooks assume `./.venv` — S · open
-5. CI does not run `generate`, `pick` or `import` — S · open
+5. CI has no job without fonts — S · open
 6. Characters drift between pages in text-only colour runs — M · open
 
 ## 1. No `picturebook new` command
@@ -33,10 +33,12 @@ checkout whose venv has another name. The README now says to install with
 `[dev]` and run `pre-commit install`. Open: make the hooks find the tools
 without `./.venv`.
 
-## 5. CI does not run `generate`, `pick` or `import`
+## 5. CI has no job without fonts
 
-The end-to-end tests build PDFs and the reader only. There is also no Linux
-job without fonts, which is where the font fallbacks matter.
+There is no Linux job without fonts, which is where the font fallbacks matter.
+The ubuntu runner has DejaVu fonts. A job in a bare `python:3.13-slim`
+container would test the fallbacks, but it could not be run or tried before
+pushing, so it is left open.
 
 ## 6. Characters drift between pages in text-only colour runs
 
@@ -58,3 +60,4 @@ Check the model names and prices on Replicate before building it.
 - 2026-11-18: Fixed: page, layout and fonts have code defaults (from examples/pip-forgets) for pdf; pdf and check list each problem with its field and page; check treats a book with no form and no meter as prose. The reader does not apply or validate them.
 - 2026-11-18: Fixed in styles: the default pages leave out pages the book lacks, a named page the book lacks is an error, and the book's own style_blocks.color is used. The default style and the prediction count are still the owner's decision.
 - 2026-11-18: Docs only: the README installs with [dev], runs pre-commit install and says the hooks need ./.venv. The hooks are unchanged.
+- 2026-11-18: Added end-to-end tests for generate (stand-in backend, no network), pick and import. The Linux job without fonts is still open.

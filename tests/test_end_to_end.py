@@ -315,6 +315,89 @@ class ReplicateFailureTest(unittest.TestCase):
             self.assertEqual(entries, {})
 
 
+class ArtWorkflowTest(unittest.TestCase):
+    """generate, pick and import, one after another, with no network.
+
+    A stand-in replaces the Replicate call and writes real PNG files where the
+    real backend would. Everything else is the code a user runs.
+    """
+
+    def setUp(self):
+        from unittest import mock
+
+        from picturebook import backends
+
+        self.tmp = Path(tempfile.mkdtemp()).resolve()
+        self.book = self.tmp / "pip-forgets"
+        shutil.copytree(EXAMPLE, self.book, ignore=shutil.ignore_patterns("images", "build"))
+        self.calls = 0
+        test = self
+
+        def fake_submit(backend, job, out_dir):
+            test.calls += 1
+            path = backends.free_path(out_dir, Path(job.image).stem)
+            Image.new("RGB", (8, 8), (test.calls * 10, 0, 0)).save(path)
+            return backends.Result(job=job, files=[path], job_id=f"fake-{test.calls}",
+                                   note="1 file(s)")
+
+        patch = mock.patch.object(backends.ReplicateBackend, "submit", fake_submit)
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.old_cwd = os.getcwd()
+        os.chdir(self.tmp)  # generate writes pick.html in the current folder
+        self.addCleanup(os.chdir, self.old_cwd)
+        self.addCleanup(shutil.rmtree, self.tmp)
+
+    def generate(self) -> str:
+        return run("generate", str(self.book), "--backend", "replicate", "--style", "line",
+                   "--pages", "1,2", "--seeds", "1,2")
+
+    def test_generate_caches_and_a_rerun_sends_nothing(self):
+        out = self.generate()
+        incoming = self.book / "images" / "_incoming"
+        self.assertEqual(sorted(p.name for p in incoming.glob("page-0*.png")),
+                         ["page-01.1.png", "page-01.2.png", "page-02.1.png", "page-02.2.png"])
+        cache = json.loads((self.book / "images" / ".generate-cache.json").read_text())
+        self.assertEqual(len(cache), 4)
+        self.assertEqual(out.count("2 sent, 0 failed, 0 cached"), 2)
+        again = self.generate()
+        self.assertEqual(self.calls, 4, "the rerun called the backend again")
+        self.assertEqual(again.count("0 sent, 0 failed, 2 cached"), 2)
+
+    def test_pick_lists_the_candidates_generate_made(self):
+        self.generate()
+        run("pick", str(self.book))
+        html = (self.tmp / "pick.html").read_text(encoding="utf-8")
+        for name in ("page-01.1.png", "page-01.2.png", "page-02.1.png", "page-02.2.png"):
+            self.assertIn(name, html)
+
+    def test_import_files_a_pick_and_keeps_the_one_it_replaces(self):
+        self.generate()
+        run("import", str(self.book), "--map", "1=page-01.1.png")
+        filed = self.book / "images" / "page-01.png"
+        with Image.open(filed) as img:
+            first = img.convert("RGB").getpixel((0, 0))
+        run("import", str(self.book), "--map", "1=page-01.2.png")
+        with Image.open(filed) as img:
+            second = img.convert("RGB").getpixel((0, 0))
+        self.assertNotEqual(first, second)
+        kept = list((self.book / "images" / "_replaced").glob("page-01.*.png"))
+        self.assertEqual(len(kept), 1)
+        with Image.open(kept[0]) as img:
+            self.assertEqual(img.convert("RGB").getpixel((0, 0)), first)
+        run("pdf", str(self.book))  # the filed art builds
+
+    def test_import_color_files_into_the_colour_folder(self):
+        incoming = self.book / "images" / "color" / "_incoming"
+        incoming.mkdir(parents=True)
+        Image.new("RGB", (8, 8), (0, 0, 200)).save(incoming / "page-03.1.png")
+        out = run("import", str(self.book), "--color")
+        self.assertIn("nothing filed", out, "a plain run only proposes")
+        run("import", str(self.book), "--color", "--map", "3=page-03.1.png")
+        self.assertTrue((self.book / "images" / "color" / "page-03.png").exists())
+        self.assertFalse((self.book / "images" / "page-03.png").exists())
+
+
 class ReaderEditionTest(unittest.TestCase):
     def test_each_edition_has_its_own_folder_and_no_stale_images(self):
         with tempfile.TemporaryDirectory() as tmp:
