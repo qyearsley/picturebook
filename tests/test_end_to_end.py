@@ -14,7 +14,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from picturebook import cli
+from picturebook import bookdata, cli
 from picturebook.bookdata import CHARACTERS_KEY, load_book, shared_file
 
 EXAMPLE = Path(__file__).resolve().parent.parent / "examples" / "pip-forgets"
@@ -166,6 +166,68 @@ class ExampleBookTest(unittest.TestCase):
         run("prompts", str(self.book))
         self.assertTrue((self.book / "text-and-prompts.md").exists())
         self.assertIn("0 page(s) to look at", run("check", str(self.book)))
+
+
+class MinimalBookTest(unittest.TestCase):
+    """A book with only a title and pages builds, and a bad one is named."""
+
+    PAGES = [
+        {"n": 1, "en": "A fox ran. It was quick. It was red.", "zh": "狐狸跑得快。"},
+        {"n": 2, "en": "A hen sat. It was calm. It was warm.", "zh": "母鸡坐着。"},
+    ]
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.book = self.tmp / "tiny"
+        self.book.mkdir()
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def write(self, **fields) -> None:
+        data = {"title": {"en": "Tiny"}, "pages": self.PAGES, **fields}
+        (self.book / "book-data.json").write_text(json.dumps(data), encoding="utf-8")
+
+    def error_of(self, *argv: str) -> str:
+        with self.assertRaises(SystemExit) as caught:
+            run(*argv)
+        self.assertIsInstance(caught.exception.code, str)
+        return caught.exception.code
+
+    def test_title_and_pages_build_a_pdf(self):
+        self.write()
+        run("pdf", str(self.book))
+        self.assertTrue((self.book / "build" / "tiny.pdf").read_bytes().startswith(b"%PDF"))
+
+    def test_a_partial_layout_keeps_its_own_values_and_fills_the_rest(self):
+        self.write(layout={"en": {"size": 30}})
+        run("pdf", str(self.book))
+        data = bookdata.with_defaults(bookdata.load_book(self.book))
+        self.assertEqual(data["layout"]["en"]["size"], 30)
+        self.assertEqual(data["layout"]["en"]["leading"], 24)
+        self.assertIn("overlay", data["layout"])
+
+    def test_defaults_are_never_written_back_by_text_positions(self):
+        self.write()
+        before = json.loads((self.book / "book-data.json").read_text(encoding="utf-8"))
+        run("text-positions", str(self.book))
+        after = json.loads((self.book / "book-data.json").read_text(encoding="utf-8"))
+        self.assertEqual(before, after)
+
+    def test_check_treats_a_book_with_no_form_and_no_meter_as_prose(self):
+        self.write(background={})
+        out = run("check", str(self.book))
+        self.assertIn("prose", out)
+        self.assertIn("0 page(s) to look at", out)
+
+    def test_a_page_with_no_text_is_named(self):
+        self.write(pages=[self.PAGES[0], {"n": 2, "zh": "母鸡坐着。"}])
+        message = self.error_of("pdf", str(self.book))
+        self.assertIn("page 2: needs text in en", message)
+
+    def test_a_bad_layout_number_names_the_field(self):
+        self.write(layout={"en": {"size": "big"}})
+        self.assertIn("layout.en.size must be a number", self.error_of("pdf", str(self.book)))
 
 
 class SharedFileTest(unittest.TestCase):

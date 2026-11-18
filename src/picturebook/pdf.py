@@ -61,7 +61,9 @@ from .bookdata import (
     WEB_JPEG_QUALITY,
     images_dir,
     load_book,
+    require_valid,
     shared_file,
+    with_defaults,
 )
 from .pinyin import cells as pinyin_cells
 
@@ -993,7 +995,8 @@ def build(project: Path, out: Path | None, cover: bool, draft: bool,
           size: str | None = None, profile: str | None = None,
           variant: str = "full", color: bool = False, web: bool = False,
           cast_page: bool = False, booklet: bool = False) -> Path:
-    data = load_book(project)
+    data = with_defaults(load_book(project))
+    require_valid(data, project)
     if booklet:
         if size and size != "half-letter":
             sys.exit("error: --booklet folds letter sheets, so it needs --size half-letter")

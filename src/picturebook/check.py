@@ -15,8 +15,10 @@ It checks four things:
 3. No two pages in a row use the same rhyme category.
 4. Each English page is exactly two lines.
 
-A book with `background.form` set to "prose" skips all four. Its pages are
-checked only for 2-5 English sentences and some Chinese text.
+A book with `background.form` set to "prose" skips all four. So does a book
+that sets no `form` and declares no `background.meter_zh`, because there is no
+verse shape to measure. Its pages are checked only for 2-5 English sentences
+and some Chinese text.
 
 Rhymes are read through the same pinyin path as the HTML reader, with the
 一 and 不 tone changes and the book's own `pinyin_overrides` applied, so a
@@ -30,7 +32,7 @@ import re
 import sys
 from pathlib import Path
 
-from .bookdata import is_han, load_book
+from .bookdata import is_han, load_book, require_valid
 from .pinyin import ruby_html
 
 RUBY = re.compile(r"<ruby>(.)<rt>(.*?)</rt></ruby>")
@@ -138,7 +140,11 @@ def check_prose(project: Path, pages: list[dict]) -> int:
 
 def check(project: Path) -> int:
     data = load_book(project)
-    if data.get("background", {}).get("form") == "prose":
+    background = data.get("background") or {}
+    form = background.get("form")
+    prose = form == "prose" or (form is None and not background.get("meter_zh"))
+    require_valid(data, project, need_zh=not prose)
+    if prose:
         return check_prose(project, data.get("pages", []))
     overrides = data.get("pinyin_overrides", {})
     pages = data.get("pages", [])
