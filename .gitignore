@@ -11,6 +11,7 @@ build/
 print/
 images/
 pick.html
+*.json.bak
 text-and-prompts.md
 *.png
 *.jpg

@@ -77,8 +77,10 @@ frame to leave quiet, because the text sits over it.
 
 `picturebook text-positions` reads that sentence. If it says `Keep the top...` or
 `Keep the upper...` or names the sky, the page's `text_position` is set to
-`top`; otherwise the band stays at the bottom. So the sentence is not a note
-to yourself, it drives the layout.
+`top`. If it names the bottom, the page goes back to the default band, at the
+bottom. If it names neither, the page keeps the `text_position` it has. So the
+sentence is not a note to yourself, it drives the layout. Before it rewrites
+`book-data.json`, the command copies the file to `book-data.json.bak`.
 
 ## Line prompts
 

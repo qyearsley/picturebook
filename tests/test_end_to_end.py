@@ -113,6 +113,29 @@ class ExampleBookTest(unittest.TestCase):
         self.assertNotIn("page-01.png", out)
         self.assertIn("page-02.png", out)
 
+    def test_text_positions_keeps_hand_set_values_and_writes_a_backup(self):
+        path = self.book / "book-data.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        pages = data["pages"]
+        pages[0]["prompt"] = "A squirrel. Keep the lower third clear."
+        pages[0]["text_position"] = "top"          # the sentence says bottom: cleared
+        pages[1]["prompt"] = "A squirrel on a log."  # no Keep sentence
+        pages[1]["text_position"] = "top"          # set by hand: kept
+        pages[2]["prompt"] = "A squirrel. Keep the top clear."
+        pages[2].pop("text_position", None)         # the sentence says top: added
+        pages[3]["prompt"] = "A squirrel. Keep the middle quiet."
+        pages[3]["text_position"] = "top"          # neither: kept
+        path.write_text(json.dumps(data), encoding="utf-8")
+        before = path.read_text(encoding="utf-8")
+        run("text-positions", str(self.book))
+        after = json.loads(path.read_text(encoding="utf-8"))["pages"]
+        self.assertNotIn("text_position", after[0])
+        self.assertEqual(after[1]["text_position"], "top")
+        self.assertEqual(after[2]["text_position"], "top")
+        self.assertEqual(after[3]["text_position"], "top")
+        self.assertEqual(
+            (self.book / "book-data.json.bak").read_text(encoding="utf-8"), before)
+
     def test_prompts_and_check(self):
         run("prompts", str(self.book))
         self.assertTrue((self.book / "text-and-prompts.md").exists())

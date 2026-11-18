@@ -5,8 +5,12 @@ Usage:
 
 Every image prompt ends with a sentence that starts "Keep", naming the part of
 the frame to leave quiet for the text. This script reads that sentence. If it
-asks for the top of the frame, the page gets "text_position": "top". Otherwise
-the page uses the book's default band, which is the bottom.
+asks for the top of the frame, the page gets "text_position": "top". If it
+asks for the bottom, a "top" set earlier is cleared, so the page uses the
+book's default band. If it asks for neither, or there is no Keep sentence, the
+page keeps whatever text_position it has, including one set by hand.
+
+Before it rewrites book-data.json it copies the file to book-data.json.bak.
 
 Run it after you edit a prompt, so the layout and the artwork never disagree.
 """
@@ -16,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 from pathlib import Path
 
 from .bookdata import CHARACTERS_KEY, load_book
@@ -34,6 +39,7 @@ def keep_sentence(prompt: str) -> str:
 
 
 def apply(project: Path) -> tuple[list[int], list[int]]:
+    """Update text_position from the Keep sentences. Returns (top pages, pages with no Keep)."""
     data_file = project / "book-data.json"
     data = load_book(project)
 
@@ -42,16 +48,18 @@ def apply(project: Path) -> tuple[list[int], list[int]]:
         sentence = keep_sentence(page.get("prompt", ""))
         if not sentence:
             missing.append(page.get("n"))
-        if not WANTS_BOTTOM.search(sentence) and WANTS_TOP.search(sentence):
-            page["text_position"] = "top"
-            top.append(page.get("n"))
-        else:
+        if WANTS_BOTTOM.search(sentence):
             page.pop("text_position", None)
+        elif WANTS_TOP.search(sentence):
+            page["text_position"] = "top"
+        if page.get("text_position") == "top":
+            top.append(page.get("n"))
 
     data.pop(CHARACTERS_KEY, None)
-    data_file.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    new_text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    if new_text != data_file.read_text(encoding="utf-8"):
+        shutil.copyfile(data_file, data_file.with_name(data_file.name + ".bak"))
+        data_file.write_text(new_text, encoding="utf-8")
     return top, missing
 
 
