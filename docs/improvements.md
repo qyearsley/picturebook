@@ -28,8 +28,10 @@ predictions to `flux-1.1-pro`. Both defaults are the owner's decision.
 
 ## 4. Pre-commit hooks assume `./.venv`
 
-The local hooks call `.venv/bin/ruff` and `.venv/bin/python`. The README
-installs without `[dev]` and never mentions `pre-commit install`.
+The local hooks call `.venv/bin/ruff` and `.venv/bin/python`, so they fail in a
+checkout whose venv has another name. The README now says to install with
+`[dev]` and run `pre-commit install`. Open: make the hooks find the tools
+without `./.venv`.
 
 ## 5. CI does not run `generate`, `pick` or `import`
 
@@ -55,3 +57,4 @@ Check the model names and prices on Replicate before building it.
 - 2026-11-18: Fixed: the placeholder note sits just below the caption, in the middle of the image, clear of a top or bottom text band.
 - 2026-11-18: Fixed: page, layout and fonts have code defaults (from examples/pip-forgets) for pdf; pdf and check list each problem with its field and page; check treats a book with no form and no meter as prose. The reader does not apply or validate them.
 - 2026-11-18: Fixed in styles: the default pages leave out pages the book lacks, a named page the book lacks is an error, and the book's own style_blocks.color is used. The default style and the prediction count are still the owner's decision.
+- 2026-11-18: Docs only: the README installs with [dev], runs pre-commit install and says the hooks need ./.venv. The hooks are unchanged.

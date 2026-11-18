@@ -132,6 +132,23 @@ already done.
 
 See `docs/prompt-sheet.md` for how to write a prompt.
 
+## Develop
+
+Install the dev tools in the repo's `.venv`, and set up the git hooks:
+
+```
+pip install -e '.[dev]'
+pre-commit install
+```
+
+The hooks call `.venv/bin/ruff` and `.venv/bin/python`, so the venv must be
+`.venv` in the repo root. To run the checks by hand:
+
+```
+ruff check src tests
+python -m unittest discover -s tests
+```
+
 ## No images in this repo
 
 The repo holds no images and no PDFs. `.gitignore` excludes them, and CI fails
