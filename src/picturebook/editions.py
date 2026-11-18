@@ -62,7 +62,7 @@ Every file starts with the cover. Some builds add a page of the characters
 How to print
 
   *-booklet.pdf   Double-sided on letter paper, flipped on the SHORT edge.
-                  Each book is 3 sheets. Fold the stack in half and staple
+                  {sheets} Fold the stack in half and staple
                   twice along the fold. Do not choose "booklet" or
                   "2 pages per sheet" at the printer; the file already is.
   *-letter.pdf    Double-sided on letter paper, flipped on the long edge
@@ -71,6 +71,23 @@ How to print
 Markers show through ordinary copy paper on a double-sided sheet. Ask for
 heavier paper (about 28-32 lb), or use crayons and pencils.
 """
+
+
+def booklet_sheets_text(counts: dict[str, int]) -> str:
+    """The sheet count for the booklet README: one sentence for the whole run."""
+    def sheets(n: int) -> str:
+        return f"{n} sheet" + ("" if n == 1 else "s")
+    if len(set(counts.values())) == 1:
+        n = next(iter(counts.values()))
+        return f"Each book is {sheets(n)}." if len(counts) > 1 else f"The book is {sheets(n)}."
+    return "The books differ: " + ", ".join(
+        f"{name} is {sheets(n)}" for name, n in counts.items()) + "."
+
+
+def booklet_sheet_count(project: Path, cast_page: bool) -> int:
+    """Sheets in the folded booklet: the cover, the cast page if any, and every page."""
+    pages = 1 + len(load_book(project).get("pages", [])) + (1 if cast_page else 0)
+    return -(-pages // 4)  # four pages to a sheet, rounded up
 
 
 def page_images(project: Path) -> list[str]:
@@ -122,9 +139,11 @@ def main(argv: list[str] | None = None) -> None:
                     help="build only the editions of this variant")
     args = ap.parse_args(argv)
 
+    sheet_counts: dict[str, int] = {}
     for project in (p.expanduser().resolve() for p in args.books):
         load_book(project)  # exits with a clear error if it is not a book
         book = project.name
+        sheet_counts[book] = booklet_sheet_count(project, args.cast_page)
         ready = {None: True, "color": color_is_current(project),
                  "line": line_is_complete(project)}
         reasons = {"color": "colour art is not finished",
@@ -150,5 +169,5 @@ def main(argv: list[str] | None = None) -> None:
 
     lines = "\n".join(f"  *-{suffix + '.pdf':<22}{about}" for suffix, *_, about in EDITIONS)
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "README.txt").write_text(README.format(editions=lines), encoding="utf-8")
+    (args.out / "README.txt").write_text(README.format(editions=lines, sheets=booklet_sheets_text(sheet_counts)), encoding="utf-8")
     print(f"  wrote README.txt in {args.out}")

@@ -6,6 +6,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -60,6 +61,19 @@ class ExampleBookTest(unittest.TestCase):
         run("print", str(self.book), "--out", str(out), "--only", "draw-in")
         self.assertTrue((out / "pip-forgets" / "pip-forgets-draw-in-letter.pdf").exists())
         self.assertTrue((out / "README.txt").exists())
+
+    def test_print_readme_gives_the_real_sheet_count(self):
+        path = self.book / "book-data.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["pages"] = data["pages"][:4]  # cover and 4 pages: 5 pages, 2 sheets
+        path.write_text(json.dumps(data), encoding="utf-8")
+        out = self.tmp / "print"
+        run("print", str(self.book), "--out", str(out), "--only", "draw-in")
+        readme = (out / "README.txt").read_text(encoding="utf-8")
+        self.assertIn("The book is 2 sheets.", readme)
+        pdf = (out / "pip-forgets" / "pip-forgets-draw-in-booklet.pdf").read_bytes()
+        printed_sides = len(re.findall(rb"/Type /Page\b(?!s)", pdf))
+        self.assertEqual(printed_sides, 2 * 2, "two sides to each of the 2 sheets")
 
     def test_manual_backend_writes_a_queue(self):
         run("generate", str(self.book), "--style", "line")
