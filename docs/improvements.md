@@ -5,16 +5,15 @@
 1. Book files need every layout and font field — M · open
 2. No `picturebook new` command — S · open
 3. Docs are one README — M · open
-4. `import` mishandles some pictures — S · open
-5. Commands crash with tracebacks on bad input — S · open
-6. Costly or surprising defaults in `generate` and `styles` — S · open
-7. The manual backend writes cache entries — S · open
-8. `text-positions` clears values set by hand — S · open
-9. The print README text assumes a 10-page book — S · open
-10. Pre-commit hooks assume `./.venv` — S · open
-11. CI does not run `generate`, `pick` or `import` — S · open
-12. Placeholder footer text hides under the text band — S · open
-13. Characters drift between pages in text-only colour runs — M · open
+4. Commands crash with tracebacks on bad input — S · open
+5. Costly or surprising defaults in `generate` and `styles` — S · open
+6. The manual backend writes cache entries — S · open
+7. `text-positions` clears values set by hand — S · open
+8. The print README text assumes a 10-page book — S · open
+9. Pre-commit hooks assume `./.venv` — S · open
+10. CI does not run `generate`, `pick` or `import` — S · open
+11. Placeholder footer text hides under the text band — S · open
+12. Characters drift between pages in text-only colour runs — M · open
 
 ## 1. Book files need every layout and font field
 
@@ -34,55 +33,49 @@ Split out: the book file reference, the three art paths, generating art (cost,
 rate limits, E005 flags), print options, languages and pinyin, the cast page
 (`cast-sheets.json`), and the `shared/` folder lookup.
 
-## 4. `import` mishandles some pictures
-
-- `--resize` stretches a picture of the wrong shape instead of cropping it.
-- It ignores the EXIF rotation of phone photos.
-- `convert("RGB")` turns a transparent background black.
-
-## 5. Commands crash with tracebacks on bad input
+## 4. Commands crash with tracebacks on bad input
 
 `import BOOK /missing-folder` and `generate --seeds a,b` end in a traceback.
 `--pages 99` and `--model nope --dry-run` give no hint. A page with no `image`
 key is queued by `generate` but rejected by `import`.
 
-## 6. Costly or surprising defaults in `generate` and `styles`
+## 5. Costly or surprising defaults in `generate` and `styles`
 
 `generate` defaults to `--style color`, so its output goes to `images/color/`,
 which a plain `import` and `pdf` do not read. `styles` with no flags sends 60
 predictions to `flux-1.1-pro`, and asks for page 9 even in a shorter book.
 `styles` also ignores a style block set in `book-data.json`.
 
-## 7. The manual backend writes cache entries
+## 6. The manual backend writes cache entries
 
 A manual run reports "11 sent", and a rerun "11 cached", though nothing was
 made.
 
-## 8. `text-positions` clears values set by hand
+## 7. `text-positions` clears values set by hand
 
 It removes `text_position` from every page whose `Keep` sentence does not ask
 for the top, and rewrites the file with no backup.
 
-## 9. The print README text assumes a 10-page book
+## 8. The print README text assumes a 10-page book
 
 "Each book is 3 sheets" is fixed text in `editions.py`.
 
-## 10. Pre-commit hooks assume `./.venv`
+## 9. Pre-commit hooks assume `./.venv`
 
 The local hooks call `.venv/bin/ruff` and `.venv/bin/python`. The README
 installs without `[dev]` and never mentions `pre-commit install`.
 
-## 11. CI does not run `generate`, `pick` or `import`
+## 10. CI does not run `generate`, `pick` or `import`
 
 The end-to-end tests build PDFs and the reader only. There is also no Linux
 job without fonts, which is where the font fallbacks matter.
 
-## 12. Placeholder footer text hides under the text band
+## 11. Placeholder footer text hides under the text band
 
 "PLACEHOLDER — replace with final art" sits near the bottom of the image, where
 the overlay band covers it.
 
-## 13. Characters drift between pages in text-only colour runs
+## 12. Characters drift between pages in text-only colour runs
 
 `generate --style color` sends text only, so FLUX redraws each character from
 the words on every page. Faces, facial hair, heights and the head count
@@ -91,3 +84,6 @@ headband). Option: a reference-image backend that sends one picked portrait
 per character with the page prompt, through a multi-image editing model.
 Check the model names and prices on Replicate before building it.
 
+## Settled
+
+- 2026-11-18: Fixed: `import --resize` crops from the centre, applies EXIF rotation, and flattens transparency onto white.

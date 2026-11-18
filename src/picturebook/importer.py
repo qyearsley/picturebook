@@ -40,7 +40,7 @@ import re
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 from .bookdata import back_up, images_dir, load_book, parse_ratio
 
@@ -171,16 +171,29 @@ def parse_map(value: str) -> dict[str, str]:
     return out
 
 
+def flatten(img: Image.Image) -> Image.Image:
+    """RGB, with any transparency composited onto white (not black)."""
+    if img.mode == "P" and "transparency" in img.info:
+        img = img.convert("RGBA")
+    if img.mode in ("RGBA", "LA"):
+        img = img.convert("RGBA")
+        background = Image.new("RGBA", img.size, (255, 255, 255, 255))
+        return Image.alpha_composite(background, img).convert("RGB")
+    return img.convert("RGB")
+
+
 def place(source: Path, target: Path, size: tuple[int, int] | None, dry: bool) -> str:
     """Write source to target as PNG, keeping whatever was already there."""
     if dry:
         return f"would write {target.name} from {source.name}"
     if target.exists():
         back_up(target)
-    with Image.open(source) as img:
-        img = img.convert("RGB")
+    with Image.open(source) as opened:
+        img = flatten(ImageOps.exif_transpose(opened))
         if size:
-            img = img.resize(size, Image.LANCZOS)
+            # Crop to the target shape from the centre, then scale, so a picture
+            # of another shape is cut rather than stretched.
+            img = ImageOps.fit(img, size, Image.LANCZOS)
         img.save(target, "PNG")
     return f"wrote {target.name} from {source.name}"
 

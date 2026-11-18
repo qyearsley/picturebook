@@ -17,6 +17,8 @@ import time
 import unittest
 from pathlib import Path
 
+from PIL import Image
+
 from picturebook import check as check_verse
 from picturebook import generate as generate_images
 from picturebook import importer as import_images
@@ -288,6 +290,47 @@ class ImportTest(unittest.TestCase):
             import_images.run(project, args)
         self.assertEqual((project / "images" / "page-01.png").read_bytes(), before)
         self.assertFalse((project / "images" / "_replaced").exists())
+
+
+class PlaceTest(unittest.TestCase):
+    """place() writes the picture the way the print file wants it."""
+
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.dir.name)
+
+    def tearDown(self):
+        self.dir.cleanup()
+
+    def place(self, img, size=None) -> Image.Image:
+        source, target = self.root / "in.png", self.root / "out.png"
+        img.save(source)
+        import_images.place(source, target, size, dry=False)
+        return Image.open(target)
+
+    def test_resize_crops_from_the_centre_instead_of_stretching(self):
+        wide = Image.new("RGB", (40, 20), (255, 0, 0))
+        for x in range(10, 30):  # a blue square, centred
+            for y in range(20):
+                wide.putpixel((x, y), (0, 0, 255))
+        out = self.place(wide, (20, 20))
+        self.assertEqual(out.size, (20, 20))
+        self.assertEqual(out.getpixel((0, 10)), (0, 0, 255), "the red edges are cropped away")
+        self.assertEqual(out.getpixel((19, 10)), (0, 0, 255))
+
+    def test_transparent_pixels_become_white(self):
+        out = self.place(Image.new("RGBA", (4, 4), (0, 0, 0, 0)))
+        self.assertEqual(out.getpixel((1, 1)), (255, 255, 255))
+
+    def test_exif_rotation_is_applied(self):
+        img = Image.new("RGB", (20, 10), (255, 0, 0))
+        exif = Image.Exif()
+        exif[0x0112] = 6  # rotate 90 degrees clockwise to display
+        source, target = self.root / "in.jpg", self.root / "out.png"
+        img.save(source, exif=exif)
+        import_images.place(source, target, None, dry=False)
+        with Image.open(target) as out:
+            self.assertEqual(out.size, (10, 20))
 
 
 if __name__ == "__main__":
