@@ -399,6 +399,35 @@ class ArtWorkflowTest(unittest.TestCase):
         self.assertTrue((self.book / "images" / "color" / "page-03.png").exists())
         self.assertFalse((self.book / "images" / "page-03.png").exists())
 
+    def test_plain_import_and_pdf_use_colour_art_once_it_exists(self):
+        run("generate", str(self.book), "--backend", "replicate", "--pages", "1")
+        self.assertTrue((self.book / "images" / "color" / "_incoming" / "page-01.1.png").exists(),
+                        "generate makes colour art by default")
+        run("import", str(self.book), "--map", "1=page-01.1.png")
+        self.assertTrue((self.book / "images" / "color" / "page-01.png").exists())
+        self.assertFalse((self.book / "images" / "page-01.png").exists())
+
+        build = self.book / "build"
+        self.assertIn("images/color/", run("pdf", str(self.book)))
+        self.assertEqual([p.name for p in build.glob("*.pdf")], ["pip-forgets-color.pdf"])
+        run("pdf", str(self.book), "--line")
+        self.assertEqual(sorted(p.name for p in build.glob("*.pdf")),
+                         ["pip-forgets-color.pdf", "pip-forgets.pdf"])
+
+    def test_line_overrides_the_colour_default_for_import(self):
+        (self.book / "images" / "color").mkdir(parents=True)
+        incoming = self.book / "images" / "_incoming"
+        incoming.mkdir()
+        Image.new("RGB", (8, 8), (0, 200, 0)).save(incoming / "page-02.1.png")
+        run("import", str(self.book), "--line", "--map", "2=page-02.1.png")
+        self.assertTrue((self.book / "images" / "page-02.png").exists())
+        self.assertFalse((self.book / "images" / "color" / "page-02.png").exists())
+
+    def test_color_and_line_together_are_refused(self):
+        for command in ("import", "pdf"):
+            with self.subTest(command=command), self.assertRaises(SystemExit):
+                run(command, str(self.book), "--color", "--line")
+
 
 class ReaderEditionTest(unittest.TestCase):
     def test_each_edition_has_its_own_folder_and_no_stale_images(self):

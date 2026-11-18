@@ -187,6 +187,17 @@ def images_dir(project: Path, color: bool = False) -> Path:
     return images / COLOR_DIR if color else images
 
 
+def use_color(project: Path, color: bool, line: bool) -> bool:
+    """--color or --line when given; otherwise colour art if images/color/ exists.
+
+    `generate` makes colour art by default, so a book that has any gets it from
+    a plain `import` or `pdf` too.
+    """
+    if color or line:
+        return color
+    return images_dir(project, color=True).is_dir()
+
+
 def is_han(ch: str) -> bool:
     cp = ord(ch)
     return any(lo <= cp <= hi for lo, hi in HAN_RANGES)

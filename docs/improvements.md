@@ -4,10 +4,6 @@
 
 1. No `picturebook new` command — S · open
 2. Docs are one README — M · open
-3. Costly or surprising defaults in `generate` and `styles` — S · open
-4. Pre-commit hooks assume `./.venv` — S · open
-5. CI has no job without fonts — S · open
-6. Characters drift between pages in text-only colour runs — M · open
 
 ## 1. No `picturebook new` command
 
@@ -19,35 +15,6 @@ minimal `book-data.json` and `characters.json`, or read a Markdown story.
 Split out: the book file reference, the three art paths, generating art (cost,
 rate limits, E005 flags), print options, languages and pinyin, the cast page
 (`cast-sheets.json`), and the `shared/` folder lookup.
-
-## 3. Costly or surprising defaults in `generate` and `styles`
-
-`generate` defaults to `--style color`, so its output goes to `images/color/`,
-which a plain `import` and `pdf` do not read. `styles` with no flags sends 60
-predictions to `flux-1.1-pro`. Both defaults are the owner's decision.
-
-## 4. Pre-commit hooks assume `./.venv`
-
-The local hooks call `.venv/bin/ruff` and `.venv/bin/python`, so they fail in a
-checkout whose venv has another name. The README now says to install with
-`[dev]` and run `pre-commit install`. Open: make the hooks find the tools
-without `./.venv`.
-
-## 5. CI has no job without fonts
-
-There is no Linux job without fonts, which is where the font fallbacks matter.
-The ubuntu runner has DejaVu fonts. A job in a bare `python:3.13-slim`
-container would test the fallbacks, but it could not be run or tried before
-pushing, so it is left open.
-
-## 6. Characters drift between pages in text-only colour runs
-
-`generate --style color` sends text only, so FLUX redraws each character from
-the words on every page. Faces, facial hair, heights and the head count
-drift, and attributes bleed between characters (a boy gets the girl's
-headband). Option: a reference-image backend that sends one picked portrait
-per character with the page prompt, through a multi-image editing model.
-Check the model names and prices on Replicate before building it.
 
 ## Settled
 
@@ -61,3 +28,9 @@ Check the model names and prices on Replicate before building it.
 - 2026-11-18: Fixed in styles: the default pages leave out pages the book lacks, a named page the book lacks is an error, and the book's own style_blocks.color is used. The default style and the prediction count are still the owner's decision.
 - 2026-11-18: Docs only: the README installs with [dev], runs pre-commit install and says the hooks need ./.venv. The hooks are unchanged.
 - 2026-11-18: Added end-to-end tests for generate (stand-in backend, no network), pick and import. The Linux job without fonts is still open.
+- 2026-11-18: Defaults: `generate` keeps `--style color`. `import` and `pdf` now use `images/color/` when it exists, and `--line` takes the line art. `styles` keeps 60 predictions to `flux-1.1-pro`.
+- 2026-11-18: Kept: the local hooks call `.venv/bin/ruff` and `.venv/bin/python`. The README says so.
+- 2026-11-18: Declined: a CI job without fonts. CI stays simple.
+- 2026-11-18: Kept: an unknown `--model` is an error with every backend, the manual one too.
+- 2026-11-18: Kept: a Keep sentence that names the bottom clears a hand-set top in `text-positions`.
+- 2026-11-18: Character drift in text-only colour runs moved to `ideas.md`.

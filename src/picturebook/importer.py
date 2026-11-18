@@ -9,6 +9,8 @@ Options:
                    oldest file first.
     --resize       Resize to the print target instead of keeping the original.
     --color        File colour art, in images/color/, instead of line art.
+                   The default when images/color/ exists.
+    --line         File line art in images/, even when images/color/ exists.
     --dry-run      Say what would happen. Change nothing.
 
 With no mapping, this scans and reports. It writes a contact sheet to
@@ -27,7 +29,9 @@ page, but it is still only a proposal. `picturebook pick` is the easier way
 to choose between variants.
 
 Colour art lives apart from the line art, in `images/color/` with its own
-`_incoming/`, so filing one never touches the other. Pass `--color` for it.
+`_incoming/`, so filing one never touches the other. `generate` makes colour
+art by default, so once `images/color/` exists a plain import files into it.
+Pass `--line` for line art then.
 
 Nothing is deleted and nothing is silently overwritten. A file already at the
 target name moves to `images/_replaced/` with a timestamp first.
@@ -42,7 +46,7 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
-from .bookdata import back_up, images_dir, load_book, parse_ratio
+from .bookdata import back_up, images_dir, load_book, parse_ratio, use_color
 
 SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 DPI = 300
@@ -282,11 +286,19 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--map", default="", help='e.g. "cover=a.png,1=b.png"')
     ap.add_argument("--by-order", action="store_true")
     ap.add_argument("--resize", action="store_true")
-    ap.add_argument("--color", action="store_true", help="file colour art, in images/color/")
+    art = ap.add_mutually_exclusive_group()
+    art.add_argument("--color", action="store_true",
+                     help="file colour art, in images/color/ (default when that folder exists)")
+    art.add_argument("--line", action="store_true",
+                     help="file line art, in images/, even when images/color/ exists")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args(argv)
 
     project = args.project.expanduser().resolve()
+    explicit = args.color
+    args.color = use_color(project, args.color, args.line)
+    if args.color and not explicit:
+        print("  filing colour art in images/color/ (pass --line for line art)")
     if args.source:
         source = args.source.expanduser().resolve()
         if not source.is_dir():

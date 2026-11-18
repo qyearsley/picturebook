@@ -2,7 +2,7 @@
 
 Usage:
     picturebook pdf [project-dir] [--out FILE] [--no-cover] [--draft]
-                    [--size NAME] [--profile NAME] [--variant NAME] [--color]
+                    [--size NAME] [--profile NAME] [--variant NAME] [--color | --line]
                     [--web] [--cast-page] [--booklet]
 
 The project directory must contain book-data.json, an images/ folder and a
@@ -24,7 +24,8 @@ text.
 
 `--color` takes the art from `images/color/` instead of the line art in
 `images/`, and adds `-color` to the file name. A page not yet coloured is
-drawn as a placeholder, so the gaps show.
+drawn as a placeholder, so the gaps show. It is the default when
+`images/color/` exists; `--line` takes the line art anyway.
 
 `--web` embeds each image as a JPEG instead of a PNG, and adds `-web` to the
 file name. A colour book drops from about 37 MB to a size a website can serve.
@@ -63,6 +64,7 @@ from .bookdata import (
     load_book,
     require_valid,
     shared_file,
+    use_color,
     with_defaults,
 )
 from .pinyin import cells as pinyin_cells
@@ -1090,8 +1092,11 @@ def main(argv: list[str] | None = None) -> None:
                     help="picturebook = full-bleed art; activity = square art on white")
     ap.add_argument("--variant", default="full", choices=sorted(VARIANTS) + ["all"],
                     help="which half of the page the child fills in (default: full)")
-    ap.add_argument("--color", action="store_true",
-                    help="use the colour art in images/color/ instead of the line art")
+    art = ap.add_mutually_exclusive_group()
+    art.add_argument("--color", action="store_true",
+                     help="use the colour art in images/color/ (default when that folder exists)")
+    art.add_argument("--line", action="store_true",
+                     help="use the line art in images/, even when images/color/ exists")
     ap.add_argument("--web", action="store_true",
                     help="embed the art as JPEG, for a smaller file to put online")
     ap.add_argument("--cast-page", action="store_true",
@@ -1104,9 +1109,12 @@ def main(argv: list[str] | None = None) -> None:
         ap.error("--out names one file, so it cannot be used with --variant all")
 
     project = args.project.expanduser().resolve()
+    color = use_color(project, args.color, args.line)
+    if color and not args.color:
+        print("  using the colour art in images/color/ (pass --line for the line art)")
     wanted = sorted(VARIANTS) if args.variant == "all" else [args.variant]
     for variant in wanted:
         out = build(project, args.out, not args.no_cover, args.draft,
                     args.placement, args.fit, args.size, args.profile, variant,
-                    args.color, args.web, args.cast_page, args.booklet)
+                    color, args.web, args.cast_page, args.booklet)
         print(f"  wrote {out}")

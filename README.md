@@ -121,9 +121,9 @@ At the end, the run writes `pick.html` in the current folder. Open it, choose
 one candidate per page, and copy the commands from the box at the bottom. Run
 them from the same folder.
 
-To paint the picked line art, generate with `--style paint`, then pick, and
-file the picks with `import --color`. Build with `pdf --color` to use the
-colour art.
+To paint the picked line art, generate with `--style paint`, then pick and
+import. Colour art goes in `images/color/`. When that folder exists, `import`
+and `pdf` use it. Pass `--line` to use the line art in `images/` instead.
 
 `--delay 11` keeps under Replicate's limit of 6 predictions a minute, which
 applies while an account has less than $5 of credit. An interrupted run can
