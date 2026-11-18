@@ -12,6 +12,10 @@ style and not from luck. The images go to `images/_styles/`, named
 and one column per page and seed. A file that already exists is not sent
 again, so an interrupted run is free to resume.
 
+The "house" style is the book's own colour block: `style_blocks.color` in
+book-data.json, else the one in characters.json. Without `--pages`, it tries
+pages 1, 3 and 9, leaving out any the book does not have.
+
 To use a winner, copy its block into the book's `style_blocks.color`.
 
 """
@@ -25,7 +29,7 @@ from pathlib import Path
 
 from .backends import Job, PredictionFailed, ReplicateBackend
 from .bookdata import load_book
-from .generate import aspect_ratio, parse_pages, shared_data
+from .generate import aspect_ratio, parse_pages, style_block
 
 # Described, not named after an artist or a film, so the look comes from the
 # words and nothing is borrowed by name.
@@ -83,6 +87,21 @@ STYLES = {
 }
 
 
+DEFAULT_PAGES = "1,3,9"
+
+
+def choose_pages(data: dict, value: str) -> set[str]:
+    """The pages to try. The default skips pages the book lacks; a named page must exist."""
+    have = {str(page.get("n")) for page in data.get("pages", [])} | {"cover"}
+    if not value:
+        return {p.zfill(2) for p in parse_pages(DEFAULT_PAGES) if p in have}
+    wanted = parse_pages(value)
+    unknown = sorted(p for p in wanted if p.lstrip("0") not in have)
+    if unknown:
+        raise SystemExit(f"error: the book has no page {', '.join(unknown)}")
+    return {p.zfill(2) if p.isdigit() else p for p in wanted}
+
+
 def page_entries(data: dict, pages: set[str]) -> list[tuple[str, dict]]:
     out = []
     for entry in data.get("pages", []):
@@ -128,7 +147,9 @@ def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("project", type=Path)
     ap.add_argument("--model", default="flux-1.1-pro")
-    ap.add_argument("--pages", default="1,3,9", help="page numbers, or cover")
+    ap.add_argument("--pages", default="",
+                    help=f"page numbers, or cover (default: {DEFAULT_PAGES}, "
+                         "leaving out any the book lacks)")
     ap.add_argument("--seeds", default="1234,1235")
     ap.add_argument("--styles", default=",".join(STYLES),
                     help=f"comma-separated, from: {', '.join(STYLES)}")
@@ -144,8 +165,8 @@ def main(argv: list[str] | None = None) -> None:
     seeds = [int(s) for s in args.seeds.split(",") if s.strip()]
 
     data = load_book(args.project)
-    house = (shared_data(data).get("style_blocks") or {}).get("color", "")
-    pages = {p.zfill(2) if p.isdigit() else p for p in parse_pages(args.pages)}
+    house = style_block(data, "color")  # the book's own block, else characters.json's
+    pages = choose_pages(data, args.pages)
     entries = page_entries(data, pages)
     if not entries:
         raise SystemExit("error: none of those pages has a colour prompt")

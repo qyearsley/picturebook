@@ -162,6 +162,24 @@ class ExampleBookTest(unittest.TestCase):
         self.assertEqual(
             (self.book / "book-data.json.bak").read_text(encoding="utf-8"), before)
 
+    def test_styles_default_pages_stay_inside_the_book(self):
+        data = json.loads((self.book / "book-data.json").read_text(encoding="utf-8"))
+        data["pages"] = data["pages"][:5]
+        (self.book / "book-data.json").write_text(json.dumps(data), encoding="utf-8")
+        out = run("styles", str(self.book), "--styles", "house", "--dry-run")
+        self.assertIn("house-page-01-", out)
+        self.assertIn("house-page-03-", out)
+        self.assertNotIn("page-09", out)
+        message = self.fails_with("styles", str(self.book), "--pages", "9", "--dry-run")
+        self.assertIn("no page 9", message)
+
+    def test_styles_honours_a_style_block_set_in_book_data(self):
+        data = json.loads((self.book / "book-data.json").read_text(encoding="utf-8"))
+        data["style_blocks"] = {"color": "A MARKER STYLE FROM THE BOOK."}
+        (self.book / "book-data.json").write_text(json.dumps(data), encoding="utf-8")
+        out = run("styles", str(self.book), "--styles", "house", "--pages", "1", "--dry-run")
+        self.assertIn("A MARKER STYLE FROM THE BOOK.", out)
+
     def test_prompts_and_check(self):
         run("prompts", str(self.book))
         self.assertTrue((self.book / "text-and-prompts.md").exists())

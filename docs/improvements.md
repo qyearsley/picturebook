@@ -24,8 +24,7 @@ rate limits, E005 flags), print options, languages and pinyin, the cast page
 
 `generate` defaults to `--style color`, so its output goes to `images/color/`,
 which a plain `import` and `pdf` do not read. `styles` with no flags sends 60
-predictions to `flux-1.1-pro`, and asks for page 9 even in a shorter book.
-`styles` also ignores a style block set in `book-data.json`.
+predictions to `flux-1.1-pro`. Both defaults are the owner's decision.
 
 ## 4. Pre-commit hooks assume `./.venv`
 
@@ -55,3 +54,4 @@ Check the model names and prices on Replicate before building it.
 - 2026-11-18: Fixed: the print README computes the sheet count from each book's page count (cover, optional cast page, pages).
 - 2026-11-18: Fixed: the placeholder note sits just below the caption, in the middle of the image, clear of a top or bottom text band.
 - 2026-11-18: Fixed: page, layout and fonts have code defaults (from examples/pip-forgets) for pdf; pdf and check list each problem with its field and page; check treats a book with no form and no meter as prose. The reader does not apply or validate them.
+- 2026-11-18: Fixed in styles: the default pages leave out pages the book lacks, a named page the book lacks is an error, and the book's own style_blocks.color is used. The default style and the prediction count are still the owner's decision.
