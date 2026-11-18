@@ -47,9 +47,18 @@ The PDF and the reader are in `examples/pip-forgets/build/`. Open
 | `text-positions` | Sets each page's text band from its prompt. |
 | `pdf` | Builds one PDF of a book. |
 | `reader` | Builds the HTML reader of a book. |
-| `print` | Builds every print edition of one or more books. |
+| `print` | Builds the print editions of one or more books: colour by default, `--activity` for the black-and-white ones. |
 
 Run `picturebook <command> --help` for the options of a command.
+
+## Print editions
+
+`picturebook print BOOK...` builds the colour editions, a half-letter booklet
+and a letter-size book. A book needs colour art on every page; it does not
+need line art. `--activity` adds the black-and-white editions: draw-in,
+colouring and write-in. The colouring and write-in editions need line art on
+every page, and `print` skips them when it is missing. `--cast-page` adds a
+page of the characters after the cover, cropped as `cast-sheets.json` says.
 
 ## Make a book with no pictures
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import shutil
 import tempfile
 import unittest
@@ -211,3 +212,71 @@ class PickPageTest(unittest.TestCase):
                 self.assertEqual(command_path(), "picturebook")
                 (bin_dir / "picturebook").write_text("")
                 self.assertEqual(command_path(), str(bin_dir / "picturebook"))
+
+
+class PrintEditionsTest(unittest.TestCase):
+    """`print` builds colour by default and does not need line art."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.book = self.tmp / "pip-forgets"
+        shutil.copytree(EXAMPLE, self.book, ignore=shutil.ignore_patterns("images", "build"))
+        self.out = self.tmp / "print"
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def names(self) -> list[str]:
+        data = load_book(self.book)
+        return [e["image"] for e in [data["cover"], *data["pages"]] if e.get("image")]
+
+    def paint(self, color: bool) -> None:
+        folder = self.book / "images" / ("color" if color else "")
+        folder.mkdir(parents=True, exist_ok=True)
+        for name in self.names():
+            Image.new("RGB", (64, 64), "orange" if color else "white").save(folder / name)
+
+    def built(self) -> set[str]:
+        return {p.name.removeprefix("pip-forgets-") for p in (self.out / "pip-forgets").glob("*.pdf")}
+
+    def test_colour_only_book_gets_colour_editions_by_default(self):
+        self.paint(color=True)
+        run("print", str(self.book), "--out", str(self.out))
+        self.assertEqual(self.built(), {"color-booklet.pdf", "color-letter.pdf"})
+
+    def test_activity_skips_line_art_editions_without_line_art(self):
+        self.paint(color=True)
+        printed = run("print", str(self.book), "--out", str(self.out), "--activity")
+        self.assertEqual(self.built(), {"color-booklet.pdf", "color-letter.pdf",
+                                        "draw-in-booklet.pdf", "draw-in-letter.pdf"})
+        self.assertIn("line art is not finished", printed)
+
+    def test_activity_with_line_art_builds_everything(self):
+        self.paint(color=False)
+        self.paint(color=True)
+        run("print", str(self.book), "--out", str(self.out), "--activity")
+        self.assertEqual(len(self.built()), 7)
+
+    def test_no_colour_art_means_no_colour_editions(self):
+        self.paint(color=False)
+        printed = run("print", str(self.book), "--out", str(self.out))
+        self.assertEqual(self.built(), set())
+        self.assertIn("colour art is not finished", printed)
+
+    def test_colour_older_than_line_art_is_stale(self):
+        from picturebook.editions import color_is_current
+        self.paint(color=True)
+        self.assertTrue(color_is_current(self.book))
+        self.paint(color=False)
+        line = self.book / "images" / self.names()[0]
+        stamp = line.stat().st_mtime + 10
+        os.utime(line, (stamp, stamp))
+        self.assertFalse(color_is_current(self.book))
+
+    def test_cast_crop_falls_back_to_colour_art(self):
+        from picturebook.pdf import cast_source
+        self.paint(color=True)
+        name = self.names()[0]
+        self.assertEqual(cast_source(self.book, name), self.book / "images" / "color" / name)
+        self.paint(color=False)
+        self.assertEqual(cast_source(self.book, name), self.book / "images" / name)

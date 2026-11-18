@@ -30,8 +30,8 @@ drawn as a placeholder, so the gaps show.
 file name. A colour book drops from about 37 MB to a size a website can serve.
 
 `--cast-page` adds a page after the cover that shows the book's characters,
-cropped from line art the book already has. `cast-sheets.json` lists
-the crops. It gives a child something to copy from in the draw-in edition.
+cropped from art the book already has: the line art, or the colour art for a
+page with no line art. `cast-sheets.json` lists the crops. It gives a child something to copy from in the draw-in edition.
 
 `--booklet` lays the half-letter pages out two to a landscape letter sheet, in
 the order that folds into a stapled booklet. Print it double-sided, flipped on
@@ -844,11 +844,18 @@ def cast_entries(project: Path, data: dict) -> list[dict]:
     return out
 
 
+def cast_source(project: Path, name: str) -> Path:
+    """The image a cast crop is cut from: line art if the page has it, else colour."""
+    line = images_dir(project) / name
+    return line if line.exists() else images_dir(project, color=True) / name
+
+
 def draw_cast_page(c, data, fonts, project, page_w, page_h, margin) -> None:
     """Draw the characters in a grid, each above its name in both languages.
 
-    The drawings always come from the line art, whatever the edition, because
-    the page is there to be copied from.
+    The drawings come from the line art, whatever the edition, because the
+    page is there to be copied from. A page with no line art uses its colour
+    art.
     """
     layout = data["layout"]
     en_cfg, zh_cfg = layout["en"], layout["zh"]
@@ -885,7 +892,7 @@ def draw_cast_page(c, data, fonts, project, page_w, page_h, margin) -> None:
         y = top - (row + 1) * cell_h
         img_box = (x + pad, y + label_h, cell_w - 2 * pad, cell_h - label_h - pad)
 
-        with Image.open(project / "images" / entry["src"]) as img:
+        with Image.open(cast_source(project, entry["src"])) as img:
             crop = img.convert("RGB").crop(tuple(entry["box"]))
         buf = io.BytesIO()
         crop.save(buf, "PNG")
