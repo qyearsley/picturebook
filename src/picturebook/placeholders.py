@@ -59,7 +59,9 @@ def render(path: Path, label: str, caption: str, color: str, force: bool,
            font=font(round(64 * scale)), fill="#6d7683", anchor="mm")
     d.text((width // 2, height // 2 + round(40 * scale)), caption,
            font=font(round(34 * scale)), fill="#8d95a0", anchor="mm")
-    d.text((width // 2, height - round(90 * scale)), "PLACEHOLDER — replace with final art",
+    # Below the caption, in the middle of the image. The text band of an overlay
+    # layout covers the top or the bottom third, so neither end is safe.
+    d.text((width // 2, height // 2 + round(90 * scale)), "PLACEHOLDER — replace with final art",
            font=font(round(26 * scale)), fill="#a0a7b0", anchor="mm")
     img.save(path)
     print(f"   {path.name}")

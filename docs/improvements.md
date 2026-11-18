@@ -8,8 +8,7 @@
 4. Costly or surprising defaults in `generate` and `styles` — S · open
 5. Pre-commit hooks assume `./.venv` — S · open
 6. CI does not run `generate`, `pick` or `import` — S · open
-7. Placeholder footer text hides under the text band — S · open
-8. Characters drift between pages in text-only colour runs — M · open
+7. Characters drift between pages in text-only colour runs — M · open
 
 ## 1. Book files need every layout and font field
 
@@ -46,12 +45,7 @@ installs without `[dev]` and never mentions `pre-commit install`.
 The end-to-end tests build PDFs and the reader only. There is also no Linux
 job without fonts, which is where the font fallbacks matter.
 
-## 7. Placeholder footer text hides under the text band
-
-"PLACEHOLDER — replace with final art" sits near the bottom of the image, where
-the overlay band covers it.
-
-## 8. Characters drift between pages in text-only colour runs
+## 7. Characters drift between pages in text-only colour runs
 
 `generate --style color` sends text only, so FLUX redraws each character from
 the words on every page. Faces, facial hair, heights and the head count
@@ -67,3 +61,4 @@ Check the model names and prices on Replicate before building it.
 - 2026-11-18: Fixed: the manual backend writes no cache entries and reports "queued, none sent".
 - 2026-11-18: Fixed: text-positions keeps a text_position the Keep sentence does not contradict, and writes book-data.json.bak first. A Keep sentence that names the bottom still clears a top.
 - 2026-11-18: Fixed: the print README computes the sheet count from each book's page count (cover, optional cast page, pages).
+- 2026-11-18: Fixed: the placeholder note sits just below the caption, in the middle of the image, clear of a top or bottom text band.

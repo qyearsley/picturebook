@@ -56,6 +56,18 @@ class ExampleBookTest(unittest.TestCase):
         self.assertIn("<ruby>", html)
         self.assertIn("Pip Forgets", html)
 
+    def test_placeholder_note_stays_clear_of_the_text_band(self):
+        run("placeholders", str(self.book))
+        with Image.open(self.book / "images" / "page-01.png") as img:
+            rgb = img.convert("RGB")
+        note = (160, 167, 176)  # the colour only the PLACEHOLDER line is drawn in
+        rows = [y for y in range(rgb.height) for x in range(0, rgb.width)
+                if rgb.getpixel((x, y)) == note]
+        self.assertTrue(rows, "the placeholder note is drawn")
+        # The text band covers up to the top or bottom 40% of a page.
+        self.assertGreater(min(rows), 0.4 * rgb.height)
+        self.assertLess(max(rows), 0.6 * rgb.height)
+
     def test_print_draw_in_editions(self):
         out = self.tmp / "print"
         run("print", str(self.book), "--out", str(out), "--only", "draw-in")
