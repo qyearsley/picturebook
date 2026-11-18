@@ -288,10 +288,13 @@ def main(argv: list[str] | None = None) -> None:
 
     project = args.project.expanduser().resolve()
     if args.source:
+        source = args.source.expanduser().resolve()
+        if not source.is_dir():
+            sys.exit(f"error: source folder {args.source} does not exist or is not a folder")
         # Copy the files into _incoming, so the scan finds them there.
         incoming = images_dir(project, args.color) / "_incoming"
         incoming.mkdir(parents=True, exist_ok=True)
-        for path in sorted(args.source.expanduser().resolve().iterdir()):
+        for path in sorted(source.iterdir()):
             if path.suffix.lower() in SUFFIXES:
                 target = incoming / path.name
                 if not target.exists():

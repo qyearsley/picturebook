@@ -72,6 +72,38 @@ class ExampleBookTest(unittest.TestCase):
         self.assertIn("seed 1234", out)
         self.assertIn("seed 1235", out)
 
+    def fails_with(self, *argv: str) -> str:
+        """The message of a clean exit. A traceback would be another exception."""
+        with self.assertRaises(SystemExit) as caught:
+            run(*argv)
+        self.assertIsInstance(caught.exception.code, str)
+        return caught.exception.code
+
+    def test_import_from_a_missing_folder_is_a_clean_error(self):
+        message = self.fails_with("import", str(self.book), str(self.tmp / "missing-folder"))
+        self.assertIn("missing-folder", message)
+
+    def test_bad_seeds_are_a_clean_error(self):
+        self.assertIn("--seeds", self.fails_with(
+            "generate", str(self.book), "--seeds", "a,b", "--dry-run"))
+
+    def test_a_page_the_book_lacks_is_a_clean_error(self):
+        self.assertIn("no page 99", self.fails_with(
+            "generate", str(self.book), "--pages", "99", "--dry-run"))
+
+    def test_an_unknown_model_is_a_clean_error_even_in_a_dry_run(self):
+        self.assertIn("unknown model 'nope'", self.fails_with(
+            "generate", str(self.book), "--model", "nope", "--dry-run"))
+
+    def test_a_page_with_no_image_key_is_skipped_by_generate(self):
+        data = json.loads((self.book / "book-data.json").read_text(encoding="utf-8"))
+        del data["pages"][0]["image"]
+        (self.book / "book-data.json").write_text(json.dumps(data), encoding="utf-8")
+        out = run("generate", str(self.book), "--style", "line", "--dry-run")
+        self.assertIn("skipping, no image name in book-data.json: page 1", out)
+        self.assertNotIn("page-01.png", out)
+        self.assertIn("page-02.png", out)
+
     def test_prompts_and_check(self):
         run("prompts", str(self.book))
         self.assertTrue((self.book / "text-and-prompts.md").exists())

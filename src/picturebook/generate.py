@@ -63,7 +63,7 @@ from datetime import datetime, timezone
 from fractions import Fraction
 from pathlib import Path
 
-from .backends import BACKENDS, Job, PredictionFailed, Result
+from .backends import BACKENDS, Job, PredictionFailed, ReplicateBackend, Result
 from .bookdata import CHARACTERS_KEY, images_dir, load_book
 
 CACHE_NAME = ".generate-cache.json"
@@ -329,33 +329,46 @@ def jobs_for(data: dict, only: set[str], style: str = "color",
     def source(image: str) -> Path | None:
         return line_dir / image if style == "paint" and line_dir else None
 
+    def wanted(label: str) -> bool:
+        return not only or label in only or label.lstrip("0") in only
+
+    # A page with no `image` key has no filename for its art. `import`, `pdf`,
+    # `reader` and `placeholders` all skip it, so this does too.
+    no_image: list[str] = []
     cover = data.get("cover") or {}
-    if pick(cover):
-        jobs.append(Job(
-            page="cover",
-            image=cover.get("image", "cover.png"),
-            text=f"{master} {for_style(pick(cover), style)}".strip(),
-            aspect=aspect,
-            negative=negative,
-            source=source(cover.get("image", "cover.png")),
-        ))
+    if pick(cover) and wanted("cover"):
+        if cover.get("image"):
+            jobs.append(Job(
+                page="cover",
+                image=cover["image"],
+                text=f"{master} {for_style(pick(cover), style)}".strip(),
+                aspect=aspect,
+                negative=negative,
+                source=source(cover["image"]),
+            ))
+        else:
+            no_image.append("cover")
     for page in data.get("pages", []):
         prompt = pick(page)
         if not prompt:
             continue
         n = page.get("n", 0)
-        image = page.get("image", f"page-{n:02d}.png")
+        if not wanted(f"{n:02d}"):
+            continue
+        if not page.get("image"):
+            no_image.append(f"page {n}")
+            continue
         jobs.append(Job(
             page=f"{n:02d}",
-            image=image,
+            image=page["image"],
             text=f"{master} {for_style(prompt, style)}".strip(),
             aspect=aspect,
             negative=negative,
-            source=source(image),
+            source=source(page["image"]),
         ))
+    if no_image:
+        print(f"  skipping, no image name in book-data.json: {', '.join(no_image)}")
 
-    if only:
-        jobs = [job for job in jobs if job.page in only or job.page.lstrip("0") in only]
     if style == "paint":
         missing = [job.image for job in jobs if not job.source.exists()]
         if missing:
@@ -395,14 +408,29 @@ def cache_key(job: Job, args: argparse.Namespace) -> str:
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 
 
+def check_pages(data: dict, only: set[str], project: Path) -> None:
+    """Exit with a clear error if --pages names a page the book does not have."""
+    known = {"cover"} | {str(page.get("n")) for page in data.get("pages", [])}
+    unknown = sorted(label for label in only if label.lstrip("0") not in known)
+    if unknown:
+        have = ", ".join(sorted(known - {"cover"}, key=lambda k: (len(k), k)))
+        sys.exit(f"error: {project.name} has no page {', '.join(unknown)}. "
+                 f"It has cover and pages {have}.")
+
+
 def run(project: Path, args: argparse.Namespace) -> int:
     data = load_book(project)
+    only = parse_pages(args.pages) if args.pages else set()
+    check_pages(data, only, project)
+    if args.model and args.model not in ReplicateBackend.MODELS:
+        # Checked for every backend, so a typo shows up in a --dry-run too.
+        sys.exit(f"error: unknown model {args.model!r}. "
+                 f"Known: {', '.join(sorted(ReplicateBackend.MODELS))}")
     backend = BACKENDS[args.backend](
         extra_flags=args.extra, model=args.model,
         variants=args.variants, seed=args.seed,
     )
-    jobs = jobs_for(data, parse_pages(args.pages) if args.pages else set(),
-                    args.style, args.aspect, art_dir(project, "line"))
+    jobs = jobs_for(data, only, args.style, args.aspect, art_dir(project, "line"))
     if not jobs:
         print(f"  {project.name}: nothing to generate")
         return 0
@@ -498,7 +526,10 @@ def main(argv: list[str] | None = None) -> None:
     # kontext-pro kept the drawing better than kontext-dev in a side-by-side test.
     if args.style == "paint" and not args.model:
         args.model = "kontext-pro"
-    seeds = [int(s) for s in args.seeds.split(",") if s.strip()] or [args.seed]
+    try:
+        seeds = [int(s) for s in args.seeds.split(",") if s.strip()] or [args.seed]
+    except ValueError:
+        sys.exit(f"error: --seeds needs whole numbers such as 1234,1235, got {args.seeds!r}")
     status = 0
     for seed in seeds:
         args.seed = seed
