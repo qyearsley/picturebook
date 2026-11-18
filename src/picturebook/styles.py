@@ -162,7 +162,10 @@ def main(argv: list[str] | None = None) -> None:
     unknown = [s for s in styles if s not in STYLES]
     if unknown:
         raise SystemExit(f"error: unknown style(s) {unknown}. Known: {', '.join(STYLES)}")
-    seeds = [int(s) for s in args.seeds.split(",") if s.strip()]
+    try:
+        seeds = [int(s) for s in args.seeds.split(",") if s.strip()]
+    except ValueError:
+        raise SystemExit(f"error: --seeds needs whole numbers such as 1234,1235, got {args.seeds!r}") from None
 
     data = load_book(args.project)
     house = style_block(data, "color")  # the book's own block, else characters.json's

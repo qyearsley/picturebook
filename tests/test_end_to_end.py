@@ -121,6 +121,8 @@ class ExampleBookTest(unittest.TestCase):
     def test_bad_seeds_are_a_clean_error(self):
         self.assertIn("--seeds", self.fails_with(
             "generate", str(self.book), "--seeds", "a,b", "--dry-run"))
+        self.assertIn("--seeds", self.fails_with(
+            "styles", str(self.book), "--seeds", "a,b"))
 
     def test_a_page_the_book_lacks_is_a_clean_error(self):
         self.assertIn("no page 99", self.fails_with(
