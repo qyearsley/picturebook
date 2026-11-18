@@ -458,7 +458,13 @@ def run(project: Path, args: argparse.Namespace) -> int:
     results: list[Result] = []
     sent = 0
     failed = []
+    manual = backend.name == "manual"
     for job in jobs:
+        if manual:
+            # Nothing is made, so there is nothing to cache or to call sent.
+            results.append(backend.submit(job, out_dir))
+            print(f"  {job.image:<16} queued for paste")
+            continue
         key = cache_key(job, args)
         if key in cache and not args.force:
             print(f"  {job.image:<16} cached")
@@ -474,7 +480,7 @@ def run(project: Path, args: argparse.Namespace) -> int:
             failed.append(job.page)
             continue
         results.append(result)
-        if not result.files and backend.name != "manual":
+        if not result.files:
             # Nothing came back, so nothing is cached: a rerun tries again.
             print(f"  {job.image:<16} FAILED: {result.note}")
             failed.append(job.page)
@@ -496,6 +502,9 @@ def run(project: Path, args: argparse.Namespace) -> int:
                               encoding="utf-8")
 
     backend.finish(results, jobs, out_dir)
+    if manual:
+        print(f"  {len(jobs)} queued, none sent")
+        return 0
     print(f"  {sent} sent, {len(failed)} failed, "
           f"{len(jobs) - sent - len(failed)} cached")
     if failed:

@@ -66,6 +66,15 @@ class ExampleBookTest(unittest.TestCase):
         queue = self.book / "images" / "_incoming" / "_queue.md"
         self.assertIn("squirrel", queue.read_text(encoding="utf-8"))
 
+    def test_manual_backend_writes_no_cache_and_claims_nothing_sent(self):
+        out = run("generate", str(self.book), "--style", "line")
+        again = run("generate", str(self.book), "--style", "line")
+        self.assertFalse((self.book / "images" / ".generate-cache.json").exists())
+        for text in (out, again):
+            self.assertIn("queued, none sent", text)
+            self.assertNotIn("cached", text)
+            self.assertNotIn(" sent,", text)
+
     def test_dry_run_names_each_seed(self):
         out = run("generate", str(self.book), "--style", "line", "--backend", "replicate",
                   "--seeds", "1234,1235", "--pages", "1", "--dry-run")

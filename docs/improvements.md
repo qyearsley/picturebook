@@ -6,13 +6,12 @@
 2. No `picturebook new` command — S · open
 3. Docs are one README — M · open
 4. Costly or surprising defaults in `generate` and `styles` — S · open
-5. The manual backend writes cache entries — S · open
-6. `text-positions` clears values set by hand — S · open
-7. The print README text assumes a 10-page book — S · open
-8. Pre-commit hooks assume `./.venv` — S · open
-9. CI does not run `generate`, `pick` or `import` — S · open
-10. Placeholder footer text hides under the text band — S · open
-11. Characters drift between pages in text-only colour runs — M · open
+5. `text-positions` clears values set by hand — S · open
+6. The print README text assumes a 10-page book — S · open
+7. Pre-commit hooks assume `./.venv` — S · open
+8. CI does not run `generate`, `pick` or `import` — S · open
+9. Placeholder footer text hides under the text band — S · open
+10. Characters drift between pages in text-only colour runs — M · open
 
 ## 1. Book files need every layout and font field
 
@@ -39,36 +38,31 @@ which a plain `import` and `pdf` do not read. `styles` with no flags sends 60
 predictions to `flux-1.1-pro`, and asks for page 9 even in a shorter book.
 `styles` also ignores a style block set in `book-data.json`.
 
-## 5. The manual backend writes cache entries
-
-A manual run reports "11 sent", and a rerun "11 cached", though nothing was
-made.
-
-## 6. `text-positions` clears values set by hand
+## 5. `text-positions` clears values set by hand
 
 It removes `text_position` from every page whose `Keep` sentence does not ask
 for the top, and rewrites the file with no backup.
 
-## 7. The print README text assumes a 10-page book
+## 6. The print README text assumes a 10-page book
 
 "Each book is 3 sheets" is fixed text in `editions.py`.
 
-## 8. Pre-commit hooks assume `./.venv`
+## 7. Pre-commit hooks assume `./.venv`
 
 The local hooks call `.venv/bin/ruff` and `.venv/bin/python`. The README
 installs without `[dev]` and never mentions `pre-commit install`.
 
-## 9. CI does not run `generate`, `pick` or `import`
+## 8. CI does not run `generate`, `pick` or `import`
 
 The end-to-end tests build PDFs and the reader only. There is also no Linux
 job without fonts, which is where the font fallbacks matter.
 
-## 10. Placeholder footer text hides under the text band
+## 9. Placeholder footer text hides under the text band
 
 "PLACEHOLDER — replace with final art" sits near the bottom of the image, where
 the overlay band covers it.
 
-## 11. Characters drift between pages in text-only colour runs
+## 10. Characters drift between pages in text-only colour runs
 
 `generate --style color` sends text only, so FLUX redraws each character from
 the words on every page. Faces, facial hair, heights and the head count
@@ -81,3 +75,4 @@ Check the model names and prices on Replicate before building it.
 
 - 2026-11-18: Fixed: `import --resize` crops from the centre, applies EXIF rotation, and flattens transparency onto white.
 - 2026-11-18: Fixed: clean errors for a missing import folder, bad --seeds, an out-of-range --pages and an unknown --model (any backend); generate skips a page with no image key, as import does.
+- 2026-11-18: Fixed: the manual backend writes no cache entries and reports "queued, none sent".
