@@ -4,8 +4,8 @@ Usage:
     picturebook pick BOOK [BOOK ...]
 
 Scans `images/_incoming` and `images/color/_incoming` in each book, and writes
-pick.html in the current folder. Its paths and commands are relative to that
-folder, so run the commands from where you ran `generate` or `pick`. If a book
+pick.html in the current folder. Its image paths are relative to that folder.
+The commands change to the root folder first, so they run from anywhere. If a book
 is outside the current folder, pick.html goes in the folder that holds the
 books instead. A page shows up when it has a variant newer than the image filed
 for it, so a page drops off the list once a pick is imported. Colour rows are

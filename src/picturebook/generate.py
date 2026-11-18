@@ -43,7 +43,8 @@ to. Colour art, from `--style color` or `paint`, lands in
 overwrites a filed image directly. Run `picturebook import` (with `--color` for
 colour) to review what arrived and file it.
 
-The cache lives in `images/.generate-cache.json` and is keyed on everything
+The cache lives in the art folder, `images/.generate-cache.json` for line art
+and `images/color/.generate-cache.json` for colour and paint. It is keyed on everything
 that changes the picture. A prompt that has not changed is not sent again, so
 an interrupted run costs nothing to resume. `--force` sends again but keeps
 the other pages' entries, so it never makes a later run pay for them twice.

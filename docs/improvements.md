@@ -3,11 +3,35 @@
 ## At a glance
 
 1. No `picturebook new` command — S · open
+2. `print --cast-page` crashes when the art is missing — S · open
+3. A `pinyin_overrides` entry of the wrong length is skipped silently — S · open
+4. `check` rejects a non-prose `form` that has no `meter_zh` — S · decision owed
 
 ## 1. No `picturebook new` command
 
 A new user copies `examples/pip-forgets` by hand. A `new` command could write a
 minimal `book-data.json` and `characters.json`, or read a Markdown story.
+
+## 2. `print --cast-page` crashes when the art is missing
+
+`print BOOK --only draw-in --cast-page` ends in a `FileNotFoundError`
+traceback when the book has no art, though `draw-in` needs none.
+`cast_source` in `pdf.py` falls through to a missing `images/color/<file>`.
+Give a clean error that names the file, or skip the cast page with a message.
+Found 2026-11-18 while the docs were written; reproduced then.
+
+## 3. A `pinyin_overrides` entry of the wrong length is skipped silently
+
+`_apply_overrides` skips an override whose syllable count does not match its
+character count. The author gets the default pinyin and no hint. Warn instead,
+or fail `check`. From a code read on 2026-11-18; not reproduced.
+
+## 4. `check` rejects a non-prose `form` that has no `meter_zh`
+
+Only an unset `background.form` falls back to prose. `"form": "verse"` with no
+`meter_zh` exits with an error about `meter_zh`. That may be intended: verse
+needs a meter. Decide, then document it in `docs/book-file.md`. From a code
+read on 2026-11-18; not reproduced.
 
 ## Settled
 
