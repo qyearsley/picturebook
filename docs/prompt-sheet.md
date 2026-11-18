@@ -88,7 +88,7 @@ Line art uses the page's `line_prompt`, not `prompt`. Write two to four plain
 sentences about one action. flux-schnell loses camera jargon, panels, head
 counts and explanations.
 
-To generate and file the art, see "Generate pictures" in `README.md`.
+To generate and file the art, see [Generate pictures](art.md#generate-pictures).
 
 ## What to avoid
 

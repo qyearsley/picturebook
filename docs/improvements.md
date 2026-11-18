@@ -3,18 +3,11 @@
 ## At a glance
 
 1. No `picturebook new` command — S · open
-2. Docs are one README — M · open
 
 ## 1. No `picturebook new` command
 
 A new user copies `examples/pip-forgets` by hand. A `new` command could write a
 minimal `book-data.json` and `characters.json`, or read a Markdown story.
-
-## 2. Docs are one README
-
-Split out: the book file reference, the three art paths, generating art (cost,
-rate limits, E005 flags), print options, languages and pinyin, the cast page
-(`cast-sheets.json`), and the `shared/` folder lookup.
 
 ## Settled
 
@@ -34,3 +27,4 @@ rate limits, E005 flags), print options, languages and pinyin, the cast page
 - 2026-11-18: Kept: an unknown `--model` is an error with every backend, the manual one too.
 - 2026-11-18: Kept: a Keep sentence that names the bottom clears a hand-set top in `text-positions`.
 - 2026-11-18: Character drift in text-only colour runs moved to `ideas.md`.
+- 2026-11-18: Docs: the README is split into docs/book-file.md, docs/art.md and docs/print.md, written from the code.
